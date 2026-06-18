@@ -23,8 +23,8 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 | Git + GitHub | ✅ Verbunden, Branch `main` |
 | **Next.js Scaffold** | ✅ Abgeschlossen |
 | Design Tokens konfigurieren | ✅ Abgeschlossen (globals.css) |
-| **Komponentenbibliothek** | ⬅️ **Hier geht es weiter** → `sprint-1.md` |
-| Screens implementieren | ⏳ Ausstehend |
+| Komponentenbibliothek (Sprint 1+2) | ✅ Abgeschlossen → `sprint-1.md`, `sprint-2.md` |
+| **Screens implementieren** | ⬅️ **Hier geht es weiter** → `sprint-3.md` |
 
 ---
 
