@@ -141,4 +141,10 @@
   html {
     @apply font-sans;
   }
+  [role="tab"] {
+    @apply font-medium text-[18px] text-[#353B4A] rounded-none border-b-[7px] border-transparent;
+  }
+  [role="tab"][data-state="active"] {
+    @apply font-bold text-black border-blue-primary;
+  }
 }
