@@ -25,7 +25,7 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 | Design Tokens konfigurieren | ✅ Abgeschlossen (globals.css) |
 | Komponentenbibliothek (Sprint 1+2) | ✅ Abgeschlossen → `sprint-1.md`, `sprint-2.md` |
 | **Screens implementieren (Sprint 3)** | ✅ Abgeschlossen → `sprint-3.md` |
-| **Screens implementieren (Sprint 4)** | ⬅️ **Hier geht es weiter** → Karte, RoutenzugPanel |
+| **Screens implementieren (Sprint 4)** | ⬅️ **Hier geht es weiter** → `sprint-4.md` |
 
 ---
 
