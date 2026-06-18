@@ -1,0 +1,19 @@
+# Lokale Claude-Einstellungen (enthält Secrets wie API-Tokens)
+.claude/settings.local.json
+
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Env-Dateien
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
