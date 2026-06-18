@@ -1,9 +1,9 @@
-import { Sidebar } from "@/components/layout/Sidebar";
+import { SidebarWrapper } from "@/components/layout/SidebarWrapper";
 
 export default function SchichtleitungLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <SidebarWrapper role="schichtleitung" />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
