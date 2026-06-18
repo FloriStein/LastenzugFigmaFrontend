@@ -21,9 +21,9 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 | Architekturentscheidungen | ✅ Alle 5 entschieden → `decisions.md` |
 | Projekt-Setup (Claude-Struktur) | ✅ Abgeschlossen |
 | Git + GitHub | ✅ Verbunden, Branch `main` |
-| **Next.js Scaffold** | ⬅️ **Hier geht es weiter** |
-| Design Tokens konfigurieren | ⏳ Ausstehend |
-| Komponentenbibliothek | ⏳ Ausstehend |
+| **Next.js Scaffold** | ✅ Abgeschlossen |
+| Design Tokens konfigurieren | ✅ Abgeschlossen (globals.css) |
+| **Komponentenbibliothek** | ⬅️ **Hier geht es weiter** |
 | Screens implementieren | ⏳ Ausstehend |
 
 ---
