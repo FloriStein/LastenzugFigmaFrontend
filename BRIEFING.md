@@ -23,7 +23,7 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 | Git + GitHub | ✅ Verbunden, Branch `main` |
 | **Next.js Scaffold** | ✅ Abgeschlossen |
 | Design Tokens konfigurieren | ✅ Abgeschlossen (globals.css) |
-| **Komponentenbibliothek** | ⬅️ **Hier geht es weiter** |
+| **Komponentenbibliothek** | ⬅️ **Hier geht es weiter** → `sprint-1.md` |
 | Screens implementieren | ⏳ Ausstehend |
 
 ---
@@ -77,6 +77,8 @@ Das Projekt-Verzeichnis ist aktuell leer bis auf die Planungsdokumente. Der Scaf
 | `CLAUDE.md` | Stack, Konventionen, Entscheidungsprozess — wird automatisch geladen |
 | `design-audit.md` | Screens-Inventar, Design Tokens, Komponenten-Mapping, Routing-Struktur |
 | `decisions.md` | Alle Architekturentscheidungen mit Begründung |
+| `backlog.md` | 47 Tickets in 5 Schichten (AT/MO/OR/TM/SC) mit Figma-Refs |
+| `sprint-1.md` | **Aktueller Sprint** — 8 Tickets, vollständige Specs, kein Figma-MCP nötig |
 | `.mcp.json` | Figma MCP Server (`figma-developer-mcp`) |
 | `.claude/settings.local.json` | Figma API Key — gitignored, nicht anfassen |
 
