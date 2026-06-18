@@ -16,15 +16,17 @@ Relevante Dokumente:
 - `sprint-1.md` — Sprint 1 ✅ (AT-01..05, MO-01..03)
 - `sprint-2.md` — Sprint 2 ✅ (OR-01..02, TM-01..02, TS-00..03)
 
-**Projektstand nach Sprint 2:**
+**Projektstand nach Sprint 3:**
 
 | Layer | Abgeschlossen |
 |---|---|
 | Atoms | PrioritätBadge, StatusBadge, FilterBadge, ListHeader, SearchBar, Tab (CSS) |
-| Molecules | NavItem, UserCard |
-| Organisms | Sidebar, SidebarKarte |
-| Templates | OperatorShell (layout.tsx), KarteShell |
-| Tests | Vitest eingerichtet, 33 Tests grün |
+| Molecules | NavItem, UserCard, EreignisListRow |
+| Organisms | Sidebar, SidebarKarte, EreignisListView |
+| Templates | ProtectedShell (role-aware layout.tsx), KarteShell |
+| Screens | Ereignisansicht (`/ereignisse`) |
+| Tests | 60 Tests grün (27 neue in Sprint 3) |
+| Routing | Alle Route-Gruppen zu `(protected)` konsolidiert — kein Next.js-16-Konflikt mehr |
 
 **Vorhandene Dateien die in Sprint 3 genutzt werden:**
 - `components/layout/SidebarWrapper.tsx` — "use client", role-prop
@@ -38,9 +40,9 @@ Relevante Dokumente:
 
 | ID | Name | Datei | Status |
 |---|---|---|---|
-| MO-04 | EreignisListRow | `components/features/EreignisListRow.tsx` | Neu |
-| OR-08 | EreignisListView | `components/features/EreignisListView.tsx` | Neu |
-| SC-03 | Ereignisansicht | `app/(operator)/ereignisse/page.tsx` | Existiert, ausfüllen |
+| MO-04 | EreignisListRow | `components/features/EreignisListRow.tsx` | ✅ Fertig |
+| OR-08 | EreignisListView | `components/features/EreignisListView.tsx` | ✅ Fertig |
+| SC-03 | Ereignisansicht | `app/(protected)/ereignisse/page.tsx` | ✅ Fertig |
 
 **Implementierungsreihenfolge:** MO-04 → OR-08 → SC-03
 
