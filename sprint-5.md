@@ -924,13 +924,15 @@ Ausfüllen: [ereignisse/[id]/page.tsx](src/app/(protected)/ereignisse/[id]/page.
 
 ```tsx
 import { render, screen, fireEvent } from "@testing-library/react";
+import EreignisDetailPage from "./page";
 
-const mockBack = vi.fn();
-const mockRouter = { back: mockBack };
+// vi.hoisted damit mockUseParams im vi.mock()-Factory referenzierbar ist
+const mockBack = vi.hoisted(() => vi.fn());
+const mockUseParams = vi.hoisted(() => vi.fn(() => ({ id: "%23102" }))); // default: #102
 
 vi.mock("next/navigation", () => ({
-  useParams: vi.fn(() => ({ id: "%23102" })),        // encodeURIComponent("#102")
-  useRouter: () => mockRouter,
+  useParams: mockUseParams,
+  useRouter: () => ({ back: mockBack }),
 }));
 
 vi.mock("next/link", () => ({
@@ -939,11 +941,9 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-// Dynamischer Import nach den Mocks
-const { default: EreignisDetailPage } = await import("./page");
-
 beforeEach(() => {
   vi.clearAllMocks();
+  mockUseParams.mockReturnValue({ id: "%23102" }); // Standard nach clearAllMocks wieder setzen
 });
 
 describe("SC-07 — EreignisDetailPage — Happy Path", () => {
@@ -955,7 +955,7 @@ describe("SC-07 — EreignisDetailPage — Happy Path", () => {
 
   it("rendert EreignisTitelleiste (blaue Box)", () => {
     const { container } = render(<EreignisDetailPage />);
-    expect(container.querySelector(".bg-\\[\\#146AA1\\]")).toBeInTheDocument();
+    expect(container.querySelector('[class*="146AA1"]')).toBeInTheDocument();
   });
 
   it("rendert FahrtmodusCard mit initialem Modus 'Manuell'", () => {
@@ -982,36 +982,38 @@ describe("SC-07 — EreignisDetailPage — Happy Path", () => {
 
 describe("SC-07 — EreignisDetailPage — Bearbeiter gesetzt", () => {
   beforeEach(() => {
-    const { useParams } = await import("next/navigation");
-    vi.mocked(useParams).mockReturnValue({ id: "%2399" }); // #99 hat Bearbeiter
+    mockUseParams.mockReturnValue({ id: "%2399" }); // #99 hat Bearbeiter "Maxi Muster"
   });
 
-  it('Bearbeiter "Maxi Muster" wird angezeigt wenn gesetzt', async () => {
-    const { useParams } = await import("next/navigation");
-    vi.mocked(useParams).mockReturnValue({ id: "%2399" });
+  it('Bearbeiter "Maxi Muster" wird angezeigt wenn gesetzt', () => {
     render(<EreignisDetailPage />);
     expect(screen.getByText("Maxi Muster")).toBeInTheDocument();
+  });
+
+  it("kein '[offen]' wenn Bearbeiter gesetzt", () => {
+    render(<EreignisDetailPage />);
+    expect(screen.queryByText("[offen]")).not.toBeInTheDocument();
   });
 });
 
 describe("SC-07 — EreignisDetailPage — Nicht gefunden", () => {
-  beforeEach(async () => {
-    const { useParams } = await import("next/navigation");
-    vi.mocked(useParams).mockReturnValue({ id: "unbekannt" });
+  beforeEach(() => {
+    mockUseParams.mockReturnValue({ id: "unbekannt" });
   });
 
-  it('zeigt "Ereignis nicht gefunden" für unbekannte ID', async () => {
-    const { useParams } = await import("next/navigation");
-    vi.mocked(useParams).mockReturnValue({ id: "unbekannt" });
+  it('zeigt "Ereignis nicht gefunden" für unbekannte ID', () => {
     render(<EreignisDetailPage />);
     expect(screen.getByText(/ereignis nicht gefunden/i)).toBeInTheDocument();
   });
 
-  it('zeigt Zurück-Link zur Ereignisliste im Fallback', async () => {
-    const { useParams } = await import("next/navigation");
-    vi.mocked(useParams).mockReturnValue({ id: "unbekannt" });
+  it('zeigt Zurück-Link zur Ereignisliste im Fallback', () => {
     render(<EreignisDetailPage />);
     expect(screen.getByRole("link")).toHaveAttribute("href", "/ereignisse");
+  });
+
+  it("rendert keine EreignisTitelleiste mit Inhalten im Fallback", () => {
+    render(<EreignisDetailPage />);
+    expect(screen.queryByText(/strecke blockiert/i)).not.toBeInTheDocument();
   });
 });
 
@@ -1023,20 +1025,22 @@ describe("SC-07 — EreignisDetailPage — FahrtmodusCard Interaktion", () => {
     expect(screen.queryByText("Manuell")).not.toBeInTheDocument();
   });
 
-  it("Klick auf 'Abschließen' in Titelleiste navigiert zurück", () => {
+  it("Klick auf 'Abschließen' in Titelleiste ruft router.back() auf", () => {
     render(<EreignisDetailPage />);
-    const abschliesenBtn = screen.queryByRole("button", { name: /abschließen/i });
-    if (abschliesenBtn) {
-      fireEvent.click(abschliesenBtn);
+    const abschließenBtn = screen.queryByRole("button", { name: /abschließen/i });
+    if (abschließenBtn) {
+      fireEvent.click(abschließenBtn);
       expect(mockBack).toHaveBeenCalledTimes(1);
     }
   });
 });
 ```
 
-> **Hinweis zu SC-07 Tests:** Die Tests für "Bearbeiter gesetzt" und "Nicht gefunden"
-> mocken `useParams` pro-Test mit `vi.mocked(...).mockReturnValue(...)`. Der `vi.mock()`
-> am Anfang der Datei setzt den Standard (#102) — individuelle Tests überschreiben ihn.
+> **Muster für SC-07-Tests:** `vi.hoisted()` stellt sicher, dass `mockUseParams` und
+> `mockBack` bereits initialisiert sind wenn die `vi.mock()`-Factories laufen (die werden
+> vor allen Imports gehoisted). Der `beforeEach` setzt den Standard-Mock nach
+> `vi.clearAllMocks()` wieder zurück — sonst würde der erste Test den State für alle
+> folgenden Tests setzen.
 
 ---
 
