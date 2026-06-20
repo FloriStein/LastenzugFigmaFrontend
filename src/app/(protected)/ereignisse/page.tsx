@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { EreignisListView } from "@/components/features/EreignisListView";
 import type { Ereignis } from "@/types/ereignis";
 
@@ -67,6 +68,7 @@ const MOCK_EREIGNISSE: Ereignis[] = [
 ];
 
 export default function EreignissePage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"alle" | "offen" | "archiv">("alle");
   const [search, setSearch] = useState("");
 
@@ -79,6 +81,7 @@ export default function EreignissePage() {
         onTabChange={setActiveTab}
         searchValue={search}
         onSearchChange={setSearch}
+        onRowClick={(id) => router.push(`/ereignisse/${encodeURIComponent(id)}`)}
       />
     </main>
   );

@@ -28,6 +28,7 @@ interface EreignisListViewProps {
   onTabChange: (tab: "alle" | "offen" | "archiv") => void;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  onRowClick?: (id: string) => void;
 }
 
 export function EreignisListView({
@@ -36,6 +37,7 @@ export function EreignisListView({
   onTabChange,
   searchValue,
   onSearchChange,
+  onRowClick,
 }: EreignisListViewProps) {
   const filtered = ereignisse
     .filter((e) => {
@@ -108,6 +110,7 @@ export function EreignisListView({
             bearbeiter={e.bearbeiter}
             priorität={e.priorität}
             erstelltAt={e.erstelltAt}
+            onClick={onRowClick ? () => onRowClick(e.id) : undefined}
           />
         ))}
       </div>

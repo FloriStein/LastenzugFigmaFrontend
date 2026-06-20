@@ -145,3 +145,47 @@ describe("EreignisListView — Spaltenheader & Toolbar", () => {
     expect(screen.getByText("als Ansicht speichern")).toBeInTheDocument();
   });
 });
+
+describe("EreignisListView — Row-Verlinkung", () => {
+  const BASE_EREIGNISSE = [
+    { id: "#102", art: "Strecke blockiert", fahrzeug: "Routenzug A",
+      status: "neu" as const, priorität: 3 as const, erstelltAt: "14:28 Uhr" },
+    { id: "#99", art: "Weiterfahrt bestätigen", fahrzeug: "Routenzug A",
+      status: "in-bearbeitung" as const, priorität: 1 as const, erstelltAt: "15:26 Uhr",
+      bearbeiter: "Maxi Muster" },
+  ];
+
+  const BASE_PROPS = {
+    ereignisse: BASE_EREIGNISSE,
+    activeTab: "alle" as const,
+    onTabChange: vi.fn(),
+    searchValue: "",
+    onSearchChange: vi.fn(),
+  };
+
+  it("ruft onRowClick mit der Ereignis-ID auf wenn Row geklickt", () => {
+    const onRowClick = vi.fn();
+    render(<EreignisListView {...BASE_PROPS} onRowClick={onRowClick} />);
+    fireEvent.click(screen.getByText("#102"));
+    expect(onRowClick).toHaveBeenCalledWith("#102");
+  });
+
+  it("ruft onRowClick mit der richtigen ID auf (zweite Row)", () => {
+    const onRowClick = vi.fn();
+    render(<EreignisListView {...BASE_PROPS} onRowClick={onRowClick} />);
+    fireEvent.click(screen.getByText("#99"));
+    expect(onRowClick).toHaveBeenCalledWith("#99");
+  });
+
+  it("kein Fehler wenn onRowClick nicht angegeben und Row geklickt", () => {
+    render(<EreignisListView {...BASE_PROPS} />);
+    expect(() => fireEvent.click(screen.getByText("#102"))).not.toThrow();
+  });
+
+  it("onRowClick wird nicht aufgerufen wenn nicht angegeben", () => {
+    const onRowClick = vi.fn();
+    render(<EreignisListView {...BASE_PROPS} />);
+    fireEvent.click(screen.getByText("#102"));
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+});
