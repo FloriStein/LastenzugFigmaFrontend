@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EreignisListView } from "@/components/features/EreignisListView";
 import type { Ereignis } from "@/types/ereignis";
+
+type TabType = "alle" | "offen" | "archiv";
 
 const MOCK_EREIGNISSE: Ereignis[] = [
   {
@@ -67,9 +69,13 @@ const MOCK_EREIGNISSE: Ereignis[] = [
   },
 ];
 
-export default function EreignissePage() {
+function EreignissePageContent() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"alle" | "offen" | "archiv">("alle");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab: TabType =
+    tabParam === "offen" || tabParam === "archiv" ? tabParam : "alle";
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [search, setSearch] = useState("");
 
   return (
@@ -84,5 +90,13 @@ export default function EreignissePage() {
         onRowClick={(id) => router.push(`/ereignisse/${encodeURIComponent(id)}`)}
       />
     </main>
+  );
+}
+
+export default function EreignissePage() {
+  return (
+    <Suspense>
+      <EreignissePageContent />
+    </Suspense>
   );
 }

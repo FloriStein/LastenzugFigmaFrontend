@@ -34,10 +34,10 @@ describe("AktionenPanel — Tab-Wechsel zu Fahrzeug", () => {
 });
 
 describe("AktionenPanel — Tab-Wechsel zu Kommunikation", () => {
-  it('Klick auf "Kommunikation" Tab zeigt Platzhalter', () => {
+  it('Klick auf "Kommunikation" Tab zeigt Inhalt', () => {
     render(<AktionenPanel fahrtmodus="manuell" />);
     fireEvent.click(screen.getByRole("button", { name: /^kommunikation$/i }));
-    expect(screen.getByText(/kommunikation/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/kommunikation/i).length).toBeGreaterThan(0);
   });
 
   it('Kommunikation-Tab versteckt FahrtmodusCard', () => {
@@ -92,5 +92,36 @@ describe("AktionenPanel — Edge Cases", () => {
       fireEvent.click(screen.getByRole("button", { name: /^kommunikation$/i }));
       fireEvent.click(screen.getByRole("button", { name: /^fahrt$/i }));
     }).not.toThrow();
+  });
+});
+
+describe("AktionenPanel — OR-07 Kommunikation-Tab Badge", () => {
+  it("Kommunikation-Tab zeigt kein Badge im Idle", () => {
+    render(<AktionenPanel fahrtmodus="manuell" />);
+    expect(screen.getByRole("button", { name: /^kommunikation$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /kommunikation \(1\)/i })).not.toBeInTheDocument();
+  });
+
+  it("Kommunikation-Tab zeigt '(1)' nach Eingehend-Trigger", () => {
+    render(<AktionenPanel fahrtmodus="manuell" />);
+    fireEvent.click(screen.getByRole("button", { name: /^kommunikation$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Fahrgastkommunikation starten" }));
+    expect(screen.getByRole("button", { name: "Kommunikation (1)" })).toBeInTheDocument();
+  });
+
+  it("Kommunikation-Tab-Badge verschwindet nach Ablehnen", () => {
+    render(<AktionenPanel fahrtmodus="manuell" />);
+    fireEvent.click(screen.getByRole("button", { name: /^kommunikation$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Fahrgastkommunikation starten" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ablehnen" }));
+    expect(screen.queryByRole("button", { name: "Kommunikation (1)" })).not.toBeInTheDocument();
+  });
+
+  it("Kommunikation-Tab-Badge bleibt beim Tab-Wechsel erhalten", () => {
+    render(<AktionenPanel fahrtmodus="manuell" />);
+    fireEvent.click(screen.getByRole("button", { name: /^kommunikation$/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Fahrgastkommunikation starten" }));
+    fireEvent.click(screen.getByRole("button", { name: /^fahrt$/i }));
+    expect(screen.getByRole("button", { name: "Kommunikation (1)" })).toBeInTheDocument();
   });
 });

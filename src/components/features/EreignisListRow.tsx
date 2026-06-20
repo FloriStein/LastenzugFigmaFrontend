@@ -27,6 +27,7 @@ export function EreignisListRow({
 
   return (
     <div
+      role="row"
       onClick={onClick}
       className={cn(
         "grid grid-cols-[153px_300px_227px_228px_225px_226px_1fr] items-center h-[48px]",

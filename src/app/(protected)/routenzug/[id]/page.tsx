@@ -37,6 +37,11 @@ const MOCK_ROUTENZUG_DETAILS: Record<string, RoutenzugDetail> = {
       { id: "AUF-03", typ: "Lieferung", priorität: 3 },
     ],
   },
+  "RZ-C": {
+    id: "RZ-C", name: "Routenzug C", status: "lädt",
+    frontImageUrl: "/mock/kamera-front-c.jpg", speedKmh: 0, acceleration: 0,
+    aufträge: [],
+  },
 };
 
 function primaryActionFor(variant: FahrtmodusVariant) {

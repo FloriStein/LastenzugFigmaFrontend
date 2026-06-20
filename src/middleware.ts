@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-type Role = "operator" | "schichtleitung" | "mitarbeiter" | "gast";
+import type { Role } from "@/types/auth";
 
 const ROLE_REDIRECT: Record<Role, string> = {
   operator: "/karte",

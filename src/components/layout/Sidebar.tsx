@@ -1,7 +1,6 @@
+import type { SidebarRole } from "@/types/auth";
 import { NavItem } from "@/components/layout/NavItem";
 import { UserCard } from "@/components/layout/UserCard";
-
-type Role = "operator" | "schichtleitung" | "mitarbeiter";
 
 interface NavItemDef {
   label: string;
@@ -71,7 +70,7 @@ const EREIGNISSE_SUB_ITEMS = [
   { label: "Archiv", href: "/ereignisse?tab=archiv" },
 ];
 
-const NAV_CONFIG: Record<Role, NavItemDef[]> = {
+const NAV_CONFIG: Record<SidebarRole, NavItemDef[]> = {
   operator: [
     { label: "Ereignisse", href: "/ereignisse", icon: <IconEreignisse />, subItems: EREIGNISSE_SUB_ITEMS },
     { label: "Aufträge", href: "/auftraege", icon: <IconAuftraege /> },
@@ -92,7 +91,7 @@ const NAV_CONFIG: Record<Role, NavItemDef[]> = {
 };
 
 interface SidebarProps {
-  role: Role;
+  role: SidebarRole;
   userName: string;
   avatarUrl?: string;
   onLogout: () => void;

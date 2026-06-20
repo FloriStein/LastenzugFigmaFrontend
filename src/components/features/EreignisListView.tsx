@@ -4,14 +4,7 @@ import { FilterBadge } from "@/components/ui-custom/FilterBadge";
 import { ListHeader } from "@/components/ui-custom/ListHeader";
 import { EreignisListRow } from "@/components/features/EreignisListRow";
 import type { Ereignis } from "@/types/ereignis";
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7 1v12M1 7h12" stroke="#146AA1" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
-}
+import { PlusIcon } from "@/components/ui-custom/icons";
 
 function SaveIcon() {
   return (

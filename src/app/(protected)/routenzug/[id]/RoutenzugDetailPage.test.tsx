@@ -143,3 +143,35 @@ describe("SC-05 — RoutenzugDetailPage — AktionenPanel Tab-Wechsel", () => {
     expect(screen.queryByText("Manuell")).not.toBeInTheDocument();
   });
 });
+
+describe("SC-05 — RoutenzugDetailPage — RZ-C (RF-04)", () => {
+  beforeEach(() => {
+    mockUseParams.mockReturnValue({ id: "RZ-C" });
+  });
+
+  it("rendert 'Routenzug C' im Titel", () => {
+    render(<RoutenzugDetailPage />);
+    expect(screen.getByText("Routenzug C")).toBeInTheDocument();
+  });
+
+  it("zeigt keinen 'nicht gefunden'-Fallback", () => {
+    render(<RoutenzugDetailPage />);
+    expect(screen.queryByText(/routenzug nicht gefunden/i)).not.toBeInTheDocument();
+  });
+
+  it("zeigt AktionenPanel (Fahrt-Tab sichtbar)", () => {
+    render(<RoutenzugDetailPage />);
+    expect(screen.getByRole("button", { name: /^fahrt$/i })).toBeInTheDocument();
+  });
+
+  it("zeigt StatusBadge 'lädt' (RZ-C ist im Lademodus)", () => {
+    render(<RoutenzugDetailPage />);
+    expect(screen.getByText(/lädt/i)).toBeInTheDocument();
+  });
+
+  it("zeigt keine Auftrags-Items (RZ-C hat keine Aufträge)", () => {
+    render(<RoutenzugDetailPage />);
+    expect(screen.queryByText("AUF-01")).not.toBeInTheDocument();
+    expect(screen.queryByText("AUF-03")).not.toBeInTheDocument();
+  });
+});

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { KarteShell } from "@/components/layout/KarteShell";
 import { RoutenzugListPanel } from "@/components/features/RoutenzugListPanel";
 import type { Routenzug } from "@/types/routenzug";
@@ -13,21 +14,21 @@ const MapCanvas = dynamic(
 
 const MOCK_ROUTENZÜGE: Routenzug[] = [
   {
-    id: "rz-a",
+    id: "RZ-A",
     name: "Routenzug A",
     aufträge: ["#212", "#209"],
     status: "fahrt-unterbrochen",
     position: { x: 1264, y: 626 },
   },
   {
-    id: "rz-b",
+    id: "RZ-B",
     name: "Routenzug B",
     aufträge: ["#210"],
     status: "fährt-automatisiert",
     position: { x: 774, y: 768 },
   },
   {
-    id: "rz-c",
+    id: "RZ-C",
     name: "Routenzug C",
     aufträge: [],
     status: "lädt",
@@ -37,20 +38,26 @@ const MOCK_ROUTENZÜGE: Routenzug[] = [
 ];
 
 export default function KartePage() {
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+
+  function handleSelect(id: string) {
+    setSelectedId(id);
+    router.push(`/routenzug/${encodeURIComponent(id)}`);
+  }
 
   return (
     <KarteShell activeItem="karte">
       <div className="flex h-full">
         <RoutenzugListPanel
           routenzüge={MOCK_ROUTENZÜGE}
-          onSelect={setSelectedId}
+          onSelect={handleSelect}
         />
         <div className="flex-1 relative">
           <MapCanvas
             routenzüge={MOCK_ROUTENZÜGE}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handleSelect}
           />
         </div>
       </div>

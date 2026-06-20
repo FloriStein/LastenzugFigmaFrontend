@@ -4,9 +4,11 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { FahrtmodusCard } from "@/components/features/FahrtmodusCard";
 import { FahrzeugAktionCard } from "@/components/features/FahrzeugAktionCard";
+import { KommunikationPanel } from "@/components/features/KommunikationPanel";
 import type { FahrtmodusVariant } from "@/types/fahrtmodus";
 
 type Tab = "fahrt" | "fahrzeug" | "kommunikation";
+type KommState = "idle" | "eingehend" | "aktiv";
 
 interface AktionenPanelProps {
   fahrtmodus: FahrtmodusVariant;
@@ -31,32 +33,39 @@ function LangsamIcon() {
   );
 }
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "fahrt", label: "Fahrt" },
-  { id: "fahrzeug", label: "Fahrzeug" },
-  { id: "kommunikation", label: "Kommunikation" },
+const BASE_TABS: { id: Tab; baseLabel: string }[] = [
+  { id: "fahrt", baseLabel: "Fahrt" },
+  { id: "fahrzeug", baseLabel: "Fahrzeug" },
+  { id: "kommunikation", baseLabel: "Kommunikation" },
 ];
 
 export function AktionenPanel({ fahrtmodus, onFahrtmodusAction }: AktionenPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>("fahrt");
+  const [kommState, setKommState] = useState<KommState>("idle");
 
   return (
     <div className="bg-dark-surface rounded-[10px] p-4 flex flex-col gap-4">
       <div className="flex gap-6 border-b border-[#4A4F5B]">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={cn(
-              "pb-2 text-[14px] font-medium",
-              activeTab === tab.id
-                ? "text-white border-b-2 border-blue-primary"
-                : "text-gray-muted"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {BASE_TABS.map((tab) => {
+          const label =
+            tab.id === "kommunikation" && kommState !== "idle"
+              ? "Kommunikation (1)"
+              : tab.baseLabel;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "pb-2 text-[14px] font-medium",
+                activeTab === tab.id
+                  ? "text-white border-b-2 border-blue-primary"
+                  : "text-gray-muted"
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === "fahrt" && (
@@ -81,7 +90,7 @@ export function AktionenPanel({ fahrtmodus, onFahrtmodusAction }: AktionenPanelP
       )}
 
       {activeTab === "kommunikation" && (
-        <span className="text-gray-muted text-[14px]">Folgt in Sprint 7</span>
+        <KommunikationPanel onStateChange={setKommState} />
       )}
     </div>
   );

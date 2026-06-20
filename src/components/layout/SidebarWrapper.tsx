@@ -2,20 +2,20 @@
 
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
-
-type Role = "operator" | "schichtleitung" | "mitarbeiter";
+import type { SidebarRole } from "@/types/auth";
 
 interface SidebarWrapperProps {
-  role: Role;
+  role: SidebarRole;
+  userName?: string;
 }
 
-export function SidebarWrapper({ role }: SidebarWrapperProps) {
+export function SidebarWrapper({ role, userName }: SidebarWrapperProps) {
   const router = useRouter();
 
   return (
     <Sidebar
       role={role}
-      userName="Matthias Muster"
+      userName={userName ?? "Benutzer"}
       onLogout={() => router.push("/login")}
     />
   );
