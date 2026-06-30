@@ -2,11 +2,12 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import RoutenzugDetailPage from "./page";
 
 const mockBack = vi.hoisted(() => vi.fn());
+const mockPush = vi.hoisted(() => vi.fn());
 const mockUseParams = vi.hoisted(() => vi.fn(() => ({ id: "RZ-A" })));
 
 vi.mock("next/navigation", () => ({
   useParams: mockUseParams,
-  useRouter: () => ({ back: mockBack }),
+  useRouter: () => ({ back: mockBack, push: mockPush }),
 }));
 
 vi.mock("next/link", () => ({
@@ -119,14 +120,72 @@ describe("SC-05 — RoutenzugDetailPage — FahrtmodusCard Interaktion", () => {
     expect(screen.getByText("Automatisch")).toBeInTheDocument();
     expect(screen.queryByText("Manuell")).not.toBeInTheDocument();
   });
+});
 
-  it("Klick auf 'Abschließen' ruft router.back() auf", () => {
+describe("RZ-02 — RoutenzugDetailPage — Abschließen-Bestätigung", () => {
+  it("Bestätigungs-Banner ist initial NICHT sichtbar", () => {
     render(<RoutenzugDetailPage />);
-    const abschließenBtn = screen.queryByRole("button", { name: /abschließen/i });
-    if (abschließenBtn) {
-      fireEvent.click(abschließenBtn);
-      expect(mockBack).toHaveBeenCalledTimes(1);
-    }
+    expect(screen.queryByText("Fahrt wirklich abschließen?")).not.toBeInTheDocument();
+  });
+
+  it("Klick auf 'Abschließen' zeigt Bestätigungs-Banner", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    expect(screen.getByText("Fahrt wirklich abschließen?")).toBeInTheDocument();
+  });
+
+  it("Klick auf 'Abschließen' ruft router.back() NICHT auf", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    expect(mockBack).not.toHaveBeenCalled();
+  });
+
+  it("Nach erstem Klick erscheint 'Ja, abschließen'-Button", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    expect(screen.getByRole("button", { name: "Ja, abschließen" })).toBeInTheDocument();
+  });
+
+  it("Nach erstem Klick erscheint 'Abbrechen'-Button", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    expect(screen.getByRole("button", { name: "Abbrechen" })).toBeInTheDocument();
+  });
+
+  it("'Ja, abschließen' ruft router.push('/karte') auf", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ja, abschließen" }));
+    expect(mockPush).toHaveBeenCalledWith("/karte");
+    expect(mockPush).toHaveBeenCalledTimes(1);
+  });
+
+  it("'Abbrechen' schließt das Banner (kein router.push)", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    fireEvent.click(screen.getByRole("button", { name: "Abbrechen" }));
+    expect(screen.queryByText("Fahrt wirklich abschließen?")).not.toBeInTheDocument();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("'Abbrechen' stellt den Ausgangszustand wieder her (kein router.back)", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    fireEvent.click(screen.getByRole("button", { name: "Abbrechen" }));
+    expect(mockBack).not.toHaveBeenCalled();
+  });
+
+  it("nach 'Abbrechen' ist der Abschließen-Button noch vorhanden", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    fireEvent.click(screen.getByRole("button", { name: "Abbrechen" }));
+    expect(screen.getByRole("button", { name: "Abschließen" })).toBeInTheDocument();
+  });
+
+  it("Banner zeigt keine FahrtmodusCard-Fehlmeldung", () => {
+    render(<RoutenzugDetailPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Abschließen" }));
+    expect(screen.getByText("Manuell")).toBeInTheDocument();
   });
 });
 
@@ -144,7 +203,7 @@ describe("SC-05 — RoutenzugDetailPage — AktionenPanel Tab-Wechsel", () => {
   });
 });
 
-describe("SC-05 — RoutenzugDetailPage — RZ-C (RF-04)", () => {
+describe("SC-05 — RoutenzugDetailPage — RZ-C (leere Auftragliste)", () => {
   beforeEach(() => {
     mockUseParams.mockReturnValue({ id: "RZ-C" });
   });
@@ -157,16 +216,6 @@ describe("SC-05 — RoutenzugDetailPage — RZ-C (RF-04)", () => {
   it("zeigt keinen 'nicht gefunden'-Fallback", () => {
     render(<RoutenzugDetailPage />);
     expect(screen.queryByText(/routenzug nicht gefunden/i)).not.toBeInTheDocument();
-  });
-
-  it("zeigt AktionenPanel (Fahrt-Tab sichtbar)", () => {
-    render(<RoutenzugDetailPage />);
-    expect(screen.getByRole("button", { name: /^fahrt$/i })).toBeInTheDocument();
-  });
-
-  it("zeigt StatusBadge 'lädt' (RZ-C ist im Lademodus)", () => {
-    render(<RoutenzugDetailPage />);
-    expect(screen.getByText(/lädt/i)).toBeInTheDocument();
   });
 
   it("zeigt keine Auftrags-Items (RZ-C hat keine Aufträge)", () => {

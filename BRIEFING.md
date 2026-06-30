@@ -27,7 +27,7 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 | Sprint 9 (Stub-Seiten: Aufträge, Einstellungen, Statistiken, Anzeigetafel) | ✅ → `sprint-9.md` |
 | Sprint 10 (Dark Mode, AuftraegePage, Stornieren-Bestätigung, Sidebar MA) | ✅ → `sprint-10.md` |
 | Sprint 11 (SearchBar Clear, Filter-Dialoge, Erstellen-Dialog) | ✅ → `sprint-11.md` |
-| **Sprint 12** (Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail) | ⬅️ **Hier geht es weiter** → `sprint-12.md` |
+| Sprint 12 (Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail) | ✅ → `sprint-12.md` |
 
 ---
 
@@ -53,7 +53,7 @@ Details in `decisions.md`.
 | `design-audit.md` | Screens-Inventar, Design Tokens, Komponenten-Mapping, Routing-Struktur |
 | `decisions.md` | Alle 5 Architekturentscheidungen mit Begründung (alle abgeschlossen) |
 | `backlog.md` | 47 Tickets in 5 Schichten (AT/MO/OR/TM/SC) mit Figma-Refs |
-| `sprint-12.md` | **Aktueller Sprint** — 4 Tickets, vollständige Specs |
+| `sprint-12.md` | Sprint 12 — abgeschlossen (4 Tickets: RP-01, OR-01, RZ-02, ER-02) |
 | `.claude/settings.local.json` | Figma API Key — gitignored, nicht anfassen |
 
 ---

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { RoutenzugDetailShell } from "@/components/layout/RoutenzugDetailShell";
 import { EreignisTitelleiste } from "@/components/features/EreignisTitelleiste";
@@ -58,6 +59,7 @@ export default function RoutenzugDetailPage() {
   const router = useRouter();
   const routenzug = MOCK_ROUTENZUG_DETAILS[decodeURIComponent(params.id)] ?? null;
   const [fahrtmodus, dispatch] = useFahrtmodus("manuell");
+  const [confirming, setConfirming] = useState(false);
 
   const handlePrimaryAction = () => dispatch(primaryActionFor(fahrtmodus));
 
@@ -78,12 +80,33 @@ export default function RoutenzugDetailPage() {
   return (
     <RoutenzugDetailShell
       titelleiste={
-        <EreignisTitelleiste
-          title={routenzug.name}
-          connectionStatus="connected"
-          backHref="/karte"
-          onAbschließen={() => router.back()}
-        />
+        <>
+          <EreignisTitelleiste
+            title={routenzug.name}
+            connectionStatus="connected"
+            backHref="/karte"
+            onAbschließen={() => setConfirming(true)}
+          />
+          {confirming && (
+            <div className="bg-[#1a1f2b] px-8 py-3 flex items-center gap-4 shrink-0">
+              <span className="text-white text-[14px]">
+                Fahrt wirklich abschließen?
+              </span>
+              <button
+                onClick={() => router.push("/karte")}
+                className="bg-blue-primary text-white rounded-[8px] px-4 py-1.5 text-[14px] font-medium hover:bg-blue-primary/80 transition-colors"
+              >
+                Ja, abschließen
+              </button>
+              <button
+                onClick={() => setConfirming(false)}
+                className="border border-white/30 text-white rounded-[8px] px-4 py-1.5 text-[14px] font-medium hover:bg-white/10 transition-colors"
+              >
+                Abbrechen
+              </button>
+            </div>
+          )}
+        </>
       }
       kameraPanel={
         <KameraPanel

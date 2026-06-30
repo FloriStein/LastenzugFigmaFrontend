@@ -98,4 +98,4 @@ Werden nach dem Design Audit in `tailwind.config.ts` eingetragen:
 | Sprint 9 | Stub-Seiten ausgebaut (AT-01, EI-01, ST-01, ANZ-01) | ✅ |
 | Sprint 10 | Dark Mode, AuftraegePage, Stornieren-Bestätigung, Sidebar MA | ✅ |
 | Sprint 11 | SearchBar Clear, Filter-Dialoge (Ereignisse/Aufträge), Erstellen-Dialog | ✅ |
-| Sprint 12 | Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail Status-Workflow | ⬅️ offen |
+| Sprint 12 | Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail Status-Workflow | ✅ |

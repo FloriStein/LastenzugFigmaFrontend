@@ -82,8 +82,10 @@ const EREIGNISSE_SUB_ITEMS = [
 
 const NAV_CONFIG: Record<SidebarRole, NavItemDef[]> = {
   operator: [
-    { label: "Ereignisse", href: "/ereignisse", icon: <IconEreignisse />, subItems: EREIGNISSE_SUB_ITEMS },
-    { label: "Aufträge", href: "/auftraege", icon: <IconAuftraege /> },
+    { label: "Ereignisse",    href: "/ereignisse",    icon: <IconEreignisse />, subItems: EREIGNISSE_SUB_ITEMS },
+    { label: "Aufträge",      href: "/auftraege",     icon: <IconAuftraege /> },
+    { label: "Karte",         href: "/karte",         icon: <IconKarte /> },
+    { label: "Linien",        href: "/linien",        icon: <IconLinien /> },
     { label: "Einstellungen", href: "/einstellungen", icon: <IconEinstellungen /> },
   ],
   schichtleitung: [

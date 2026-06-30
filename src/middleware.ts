@@ -20,11 +20,17 @@ function parseJwtPayload(token: string): { role?: Role } | null {
   }
 }
 
+function passThrough(request: NextRequest): NextResponse {
+  const response = NextResponse.next();
+  response.headers.set("x-next-pathname", request.nextUrl.pathname);
+  return response;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
+    return passThrough(request);
   }
 
   const token = request.cookies.get("auth-token")?.value;
@@ -39,14 +45,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Redirect "/" to the role's home page
   if (pathname === "/") {
     return NextResponse.redirect(
       new URL(ROLE_REDIRECT[payload.role] ?? "/login", request.url)
     );
   }
 
-  return NextResponse.next();
+  return passThrough(request);
 }
 
 export const config = {

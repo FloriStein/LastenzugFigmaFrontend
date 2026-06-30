@@ -1,5 +1,7 @@
 # Sprint 12 — Routing-Komplettierung, Ereignis-Detail & Operator-Navigation
 
+**Status: ✅ Abgeschlossen** — Implementierung + 797 Tests grün (davon 63 neue Sprint-12-Tests)
+
 ## Ziel
 
 Root-Page verdrahten, Operator-Sidebar vollständig machen (inkl. Layout-Fix für Karte/Linien), RoutenzugDetail-Abschließen absichern und Ereignis-Detail auf das Niveau von AuftragDetail heben.
