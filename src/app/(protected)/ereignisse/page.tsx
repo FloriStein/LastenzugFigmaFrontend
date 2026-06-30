@@ -3,7 +3,9 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EreignisListView } from "@/components/features/EreignisListView";
-import type { Ereignis } from "@/types/ereignis";
+import { EreignisFilterDialog } from "@/components/features/EreignisFilterDialog";
+import type { Ereignis, EreignisFilter } from "@/types/ereignis";
+import { EMPTY_EREIGNIS_FILTER } from "@/types/ereignis";
 
 type TabType = "alle" | "offen" | "archiv";
 
@@ -77,19 +79,37 @@ function EreignissePageContent() {
     tabParam === "offen" || tabParam === "archiv" ? tabParam : "alle";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<EreignisFilter>(EMPTY_EREIGNIS_FILTER);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   return (
-    <main className="px-14 pt-16">
-      <h1 className="text-[42px] font-bold text-black mb-15.75">Ereignisse</h1>
-      <EreignisListView
-        ereignisse={MOCK_EREIGNISSE}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        searchValue={search}
-        onSearchChange={setSearch}
-        onRowClick={(id) => router.push(`/ereignisse/${encodeURIComponent(id)}`)}
+    <>
+      <main className="px-14 pt-16">
+        <h1 className="text-[42px] font-bold text-black mb-15.75">Ereignisse</h1>
+        <EreignisListView
+          ereignisse={MOCK_EREIGNISSE}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          searchValue={search}
+          onSearchChange={setSearch}
+          onRowClick={(id) => router.push(`/ereignisse/${encodeURIComponent(id)}`)}
+          filter={filter}
+          onFilterOpen={() => setFilterOpen(true)}
+          onFilterRemove={(key) =>
+            setFilter((prev) => ({
+              ...prev,
+              [key]: Array.isArray(prev[key]) ? [] : "",
+            }))
+          }
+        />
+      </main>
+      <EreignisFilterDialog
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        initialFilter={filter}
+        onApply={setFilter}
       />
-    </main>
+    </>
   );
 }
 

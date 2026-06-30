@@ -46,7 +46,7 @@ const GESAMT = NACH_ART.reduce((s, e) => s + e.value, 0);
 
 function Panel({ title, children, headerRight }: { title: string; children: React.ReactNode; headerRight?: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-[10px] p-6">
+    <div className="bg-background rounded-[10px] p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-[18px] font-semibold">{title}</h2>
         {headerRight}

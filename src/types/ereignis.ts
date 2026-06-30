@@ -13,3 +13,15 @@ export interface Ereignis {
   priorität: 1 | 2 | 3 | 4;
   erstelltAt: string;
 }
+
+export type EreignisFilter = {
+  status: EreignisStatus[];
+  priorität: (1 | 2 | 3 | 4)[];
+  fahrzeug: string;
+};
+
+export const EMPTY_EREIGNIS_FILTER: EreignisFilter = {
+  status: [],
+  priorität: [],
+  fahrzeug: "",
+};

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { EreignisListView } from "./EreignisListView";
-import type { Ereignis } from "@/types/ereignis";
+import type { Ereignis, EreignisFilter } from "@/types/ereignis";
 
 const MOCK: Ereignis[] = [
   { id: "#103", art: "Kommunikationsanfrage", fahrzeug: "Routenzug B", status: "neu", priorität: 4, erstelltAt: "16:04 Uhr" },
@@ -187,5 +187,136 @@ describe("EreignisListView — Row-Verlinkung", () => {
     render(<EreignisListView {...BASE_PROPS} />);
     fireEvent.click(screen.getByText("#102"));
     expect(onRowClick).not.toHaveBeenCalled();
+  });
+});
+
+const EMPTY_FILTER: EreignisFilter = { status: [], priorität: [], fahrzeug: "" };
+
+describe("EreignisListView — FD-01: Filter nach EreignisFilter", () => {
+  it("kein filter-Prop → alle Ereignisse des aktiven Tabs sichtbar", () => {
+    renderView({ activeTab: "alle" });
+    expect(screen.getAllByText(/^#\d+$/).length).toBe(7);
+  });
+
+  it("filter.status=['neu'] → nur 'neu'-Ereignisse sichtbar", () => {
+    renderView({ filter: { ...EMPTY_FILTER, status: ["neu"] } });
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("#102")).toBeInTheDocument();
+    expect(screen.queryByText("#99")).not.toBeInTheDocument();
+    expect(screen.queryByText("#96")).not.toBeInTheDocument();
+    expect(screen.queryByText("#95")).not.toBeInTheDocument();
+  });
+
+  it("filter.status=['abgeschlossen'] → nur abgeschlossene sichtbar", () => {
+    renderView({ filter: { ...EMPTY_FILTER, status: ["abgeschlossen"] } });
+    expect(screen.getByText("#95")).toBeInTheDocument();
+    expect(screen.queryByText("#103")).not.toBeInTheDocument();
+  });
+
+  it("filter.status=['neu','warten'] → beide Status-Gruppen sichtbar", () => {
+    renderView({ filter: { ...EMPTY_FILTER, status: ["neu", "warten"] } });
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("#96")).toBeInTheDocument();
+    expect(screen.queryByText("#99")).not.toBeInTheDocument();
+  });
+
+  it("filter.priorität=[3] → nur Priorität-3-Ereignisse sichtbar", () => {
+    renderView({ filter: { ...EMPTY_FILTER, priorität: [3] } });
+    expect(screen.getByText("#102")).toBeInTheDocument();
+    expect(screen.getByText("#100")).toBeInTheDocument();
+    expect(screen.getByText("#96")).toBeInTheDocument();
+    expect(screen.queryByText("#103")).not.toBeInTheDocument();
+    expect(screen.queryByText("#99")).not.toBeInTheDocument();
+  });
+
+  it("filter.fahrzeug='Routenzug B' → case-insensitive, nur B-Fahrzeuge", () => {
+    renderView({ filter: { ...EMPTY_FILTER, fahrzeug: "Routenzug B" } });
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("#101")).toBeInTheDocument();
+    expect(screen.queryByText("#102")).not.toBeInTheDocument();
+  });
+
+  it("filter.fahrzeug='routenzug b' → case-insensitiv gefunden", () => {
+    renderView({ filter: { ...EMPTY_FILTER, fahrzeug: "routenzug b" } });
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.queryByText("#102")).not.toBeInTheDocument();
+  });
+
+  it("filter.fahrzeug='xxxxxxxxxxx' → keine Treffer", () => {
+    renderView({ filter: { ...EMPTY_FILTER, fahrzeug: "xxxxxxxxxxx" } });
+    expect(screen.queryAllByText(/^#\d+$/).length).toBe(0);
+  });
+
+  it("Tab-Filter + EreignisFilter kombinieren sich", () => {
+    renderView({
+      activeTab: "offen",
+      filter: { ...EMPTY_FILTER, fahrzeug: "Routenzug B" },
+    });
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("#101")).toBeInTheDocument();
+    expect(screen.queryByText("#95")).not.toBeInTheDocument();
+  });
+
+  it("Suche + EreignisFilter kombinieren sich", () => {
+    renderView({
+      searchValue: "Strecke",
+      filter: { ...EMPTY_FILTER, status: ["neu"] },
+    });
+    expect(screen.getByText("#102")).toBeInTheDocument();
+    expect(screen.queryByText("#96")).not.toBeInTheDocument();
+    expect(screen.queryByText("#95")).not.toBeInTheDocument();
+  });
+});
+
+describe("EreignisListView — FD-01: Filter-Badges & Callbacks", () => {
+  it("'neuer Filter' Button ruft onFilterOpen auf", () => {
+    const onFilterOpen = vi.fn();
+    renderView({ onFilterOpen });
+    fireEvent.click(screen.getByText("neuer Filter"));
+    expect(onFilterOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("kein onFilterOpen → kein Fehler bei Klick auf 'neuer Filter'", () => {
+    renderView();
+    expect(() => fireEvent.click(screen.getByText("neuer Filter"))).not.toThrow();
+  });
+
+  it("filter.status=['neu'] → Badge zeigt 'neu', nicht 'alle'", () => {
+    renderView({ filter: { ...EMPTY_FILTER, status: ["neu"] } });
+    expect(screen.queryByRole("button", { name: /Status:.*alle/ })).not.toBeInTheDocument();
+    const statusBadge = screen.getAllByRole("button").find(
+      (b) => b.textContent?.includes("Status:") && b.textContent?.includes("neu")
+    );
+    expect(statusBadge).toBeInTheDocument();
+  });
+
+  it("filter.fahrzeug='Routenzug B' → Fahrzeug-Badge zeigt 'Routenzug B'", () => {
+    renderView({ filter: { ...EMPTY_FILTER, fahrzeug: "Routenzug B" } });
+    const badge = screen.getAllByRole("button").find(
+      (b) => b.textContent?.includes("Fahrzeug:") && b.textContent?.includes("Routenzug B")
+    );
+    expect(badge).toBeInTheDocument();
+  });
+
+  it("onFilterRemove('status') wird aufgerufen wenn Status-Badge × geklickt", () => {
+    const onFilterRemove = vi.fn();
+    renderView({
+      filter: { ...EMPTY_FILTER, status: ["neu"] },
+      onFilterRemove,
+    });
+    const removeButtons = screen.getAllByRole("button", { name: "×" });
+    fireEvent.click(removeButtons[0]);
+    expect(onFilterRemove).toHaveBeenCalledWith("status");
+  });
+
+  it("onFilterRemove('fahrzeug') wird aufgerufen wenn Fahrzeug-Badge × geklickt", () => {
+    const onFilterRemove = vi.fn();
+    renderView({
+      filter: { ...EMPTY_FILTER, fahrzeug: "Routenzug A" },
+      onFilterRemove,
+    });
+    const removeButton = screen.getByRole("button", { name: "×" });
+    fireEvent.click(removeButton);
+    expect(onFilterRemove).toHaveBeenCalledWith("fahrzeug");
   });
 });

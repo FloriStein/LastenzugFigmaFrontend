@@ -34,9 +34,20 @@ export function SearchBar({ value, onChange, placeholder, size = "default" }: Se
           "font-medium text-[15px] text-[#646A79] placeholder:text-[#646A79] pl-3.75"
         )}
       />
-      <span className="absolute right-3 flex items-center pointer-events-none">
-        <SearchIcon />
-      </span>
+      {value.length > 0 ? (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Suche löschen"
+          className="absolute right-3 flex items-center text-gray-muted hover:text-dark-surface transition-colors"
+        >
+          <span className="text-[16px] leading-none select-none">×</span>
+        </button>
+      ) : (
+        <span className="absolute right-3 flex items-center pointer-events-none">
+          <SearchIcon />
+        </span>
+      )}
     </div>
   );
 }

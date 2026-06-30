@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import type { Auftrag, AuftragTab } from "@/types/auftrag";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Auftrag, AuftragFilter, AuftragTab } from "@/types/auftrag";
+import { EMPTY_AUFTRAG_FILTER } from "@/types/auftrag";
 import { AuftragListView } from "@/components/features/AuftragListView";
+import { AuftragErstellenDialog } from "@/components/features/AuftragErstellenDialog";
+import { AuftragFilterDialog } from "@/components/features/AuftragFilterDialog";
 
-const MOCK_AUFTRÄGE: Auftrag[] = [
+const INITIAL_AUFTRÄGE: Auftrag[] = [
   {
     id: "AUF-001",
     linie: "L1",
@@ -50,20 +54,62 @@ const MOCK_AUFTRÄGE: Auftrag[] = [
   },
 ];
 
-export default function AuftraegePage() {
-  const [activeTab, setActiveTab] = useState<AuftragTab>("alle");
+function AuftragPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab: AuftragTab =
+    tabParam === "offen" || tabParam === "archiv" ? tabParam : "alle";
+  const [activeTab, setActiveTab] = useState<AuftragTab>(initialTab);
   const [searchValue, setSearchValue] = useState("");
+  const [aufträge, setAufträge] = useState<Auftrag[]>(INITIAL_AUFTRÄGE);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [auftragsFilter, setAuftragsFilter] = useState<AuftragFilter>(EMPTY_AUFTRAG_FILTER);
 
   return (
-    <div className="p-6 bg-white min-h-screen">
-      <h1 className="text-[24px] font-bold text-black mb-6">Aufträge</h1>
-      <AuftragListView
-        aufträge={MOCK_AUFTRÄGE}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
+    <>
+      <main className="px-14 pt-16">
+        <h1 className="text-[42px] font-bold mb-15.75">Aufträge</h1>
+        <AuftragListView
+          aufträge={aufträge}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          onRowClick={(id) => router.push(`/auftraege/${encodeURIComponent(id)}`)}
+          onNeuErstellen={() => setCreateOpen(true)}
+          filter={auftragsFilter}
+          onFilterOpen={() => setFilterOpen(true)}
+          onFilterRemove={(key) =>
+            setAuftragsFilter((prev) => ({ ...prev, [key]: [] }))
+          }
+        />
+      </main>
+      <AuftragErstellenDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSubmit={(data) =>
+          setAufträge((prev) => [
+            { ...data, id: `AUF-${String(prev.length + 1).padStart(3, "0")}` },
+            ...prev,
+          ])
+        }
       />
-    </div>
+      <AuftragFilterDialog
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        initialFilter={auftragsFilter}
+        onApply={setAuftragsFilter}
+      />
+    </>
+  );
+}
+
+export default function AuftraegePage() {
+  return (
+    <Suspense>
+      <AuftragPageContent />
+    </Suspense>
   );
 }

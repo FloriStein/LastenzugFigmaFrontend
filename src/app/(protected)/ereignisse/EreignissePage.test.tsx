@@ -107,3 +107,40 @@ describe("EreignissePage — Tab-Wechsel nach Laden (RF-06)", () => {
     expect(screen.getByText("#95")).toBeInTheDocument();
   });
 });
+
+describe("EreignissePage — FD-01: Filter-Dialog Integration", () => {
+  it("zeigt 'neuer Filter' Button", () => {
+    render(<EreignissePage />);
+    expect(screen.getByRole("button", { name: /neuer Filter/i })).toBeInTheDocument();
+  });
+
+  it("Klick auf 'neuer Filter' öffnet FilterDialog (Titel 'Filter' sichtbar)", () => {
+    render(<EreignissePage />);
+    fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }));
+    expect(screen.getByText("Filter")).toBeInTheDocument();
+  });
+
+  it("Filter-Dialog zeigt Status-Checkboxen", () => {
+    render(<EreignissePage />);
+    fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }));
+    expect(screen.getByRole("checkbox", { name: "Neu" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Abgeschlossen" })).toBeInTheDocument();
+  });
+
+  it("'Abbrechen' im Dialog schließt ihn wieder", () => {
+    render(<EreignissePage />);
+    fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Abbrechen" }));
+    expect(screen.queryByText("Filter")).not.toBeInTheDocument();
+  });
+
+  it("Filter auf status=abgeschlossen → nur #95 in der Liste", () => {
+    render(<EreignissePage />);
+    fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Abgeschlossen" }));
+    fireEvent.click(screen.getByRole("button", { name: "Anwenden" }));
+    expect(screen.getByText("#95")).toBeInTheDocument();
+    expect(screen.queryByText("#103")).not.toBeInTheDocument();
+    expect(screen.queryByText("#99")).not.toBeInTheDocument();
+  });
+});

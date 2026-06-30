@@ -1,6 +1,7 @@
-import type { Auftrag, AuftragStatus, AuftragTab } from "@/types/auftrag";
+import type { Auftrag, AuftragFilter, AuftragTab } from "@/types/auftrag";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchBar } from "@/components/ui-custom/SearchBar";
+import { FilterBadge } from "@/components/ui-custom/FilterBadge";
 import { ListHeader } from "@/components/ui-custom/ListHeader";
 import { AuftragListRow } from "@/components/features/AuftragListRow";
 import { PlusIcon } from "@/components/ui-custom/icons";
@@ -13,6 +14,9 @@ interface AuftragListViewProps {
   onSearchChange: (value: string) => void;
   onRowClick?: (id: string) => void;
   onNeuErstellen?: () => void;
+  filter?: AuftragFilter;
+  onFilterOpen?: () => void;
+  onFilterRemove?: (key: keyof AuftragFilter) => void;
 }
 
 export function AuftragListView({
@@ -23,6 +27,9 @@ export function AuftragListView({
   onSearchChange,
   onRowClick,
   onNeuErstellen,
+  filter,
+  onFilterOpen,
+  onFilterRemove,
 }: AuftragListViewProps) {
   const filtered = aufträge
     .filter((a) => {
@@ -38,6 +45,11 @@ export function AuftragListView({
         a.art.toLowerCase().includes(q) ||
         a.auftraggeber.toLowerCase().includes(q)
       );
+    })
+    .filter((a) => {
+      if (filter?.status.length && !filter.status.includes(a.status)) return false;
+      if (filter?.art.length && !filter.art.includes(a.art)) return false;
+      return true;
     });
 
   return (
@@ -55,7 +67,7 @@ export function AuftragListView({
           <button
             type="button"
             onClick={onNeuErstellen}
-            className="inline-flex items-center gap-1.5 h-[27px] px-3 rounded-[4px] bg-[rgba(20,106,161,0.1)] text-[#146AA1] font-semibold text-[15px]"
+            className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
           >
             Lieferauftrag erstellen
             <PlusIcon />
@@ -63,9 +75,44 @@ export function AuftragListView({
         </div>
       </div>
 
-      <hr className="border-t border-[#9A9EA0]" />
+      <hr className="border-t border-gray-muted" />
 
-      <div className="grid grid-cols-[120px_100px_130px_180px_160px_100px_1fr] items-center h-[18px] mt-3 mb-2">
+      <div className="flex items-center gap-2 py-2">
+        {filter?.status.length ? (
+          <FilterBadge
+            header="Status:"
+            text={filter.status.join(", ")}
+            variant="selected"
+            onRemove={() => onFilterRemove?.("status")}
+          />
+        ) : (
+          <FilterBadge header="Status:" text="alle" variant="auto-width" />
+        )}
+        {filter?.art.length ? (
+          <FilterBadge
+            header="Art:"
+            text={filter.art.join(", ")}
+            variant="selected"
+            onRemove={() => onFilterRemove?.("art")}
+          />
+        ) : (
+          <FilterBadge header="Art:" text="alle" variant="auto-width" />
+        )}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onFilterOpen}
+            className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
+          >
+            neuer Filter
+            <PlusIcon />
+          </button>
+        </div>
+      </div>
+
+      <hr className="border-t border-gray-muted" />
+
+      <div className="grid grid-cols-[120px_100px_130px_180px_160px_100px_1fr] items-center h-4.5 mt-3 mb-2">
         <ListHeader label="ID" sort="none" />
         <ListHeader label="Linie" sort="none" />
         <ListHeader label="Art" sort="none" />

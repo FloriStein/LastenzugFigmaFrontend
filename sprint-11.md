@@ -1,5 +1,7 @@
 # Sprint 11 — Filter-Dialoge & UX-Verfeinerung
 
+> **Status: ✅ Abgeschlossen** — Implementierung + Tests vollständig
+
 ## Ziel
 
 Filter-Dialoge für Ereignisse und Aufträge implementieren, "Lieferauftrag erstellen" Dialog verdrahten und kleinere UX-Gaps schließen.

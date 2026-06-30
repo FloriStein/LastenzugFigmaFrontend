@@ -1,5 +1,7 @@
 # Sprint 10 — Dark Mode, Aufträge-Navigation & UX-Verbesserungen
 
+> **Status: ✅ Abgeschlossen** — Implementierung + Tests vollständig
+
 ## Ziel
 
 Dark Mode funktional verdrahten, AuftraegePage vollständig machen (Layout, Navigation, URL-Tab-Sync) und zwei UX-Gaps schließen (Stornieren-Bestätigung, Sidebar Mitarbeiter).

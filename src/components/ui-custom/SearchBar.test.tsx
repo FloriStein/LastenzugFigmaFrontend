@@ -30,3 +30,46 @@ describe("SearchBar", () => {
     expect(screen.getByRole("textbox")).not.toHaveAttribute("placeholder");
   });
 });
+
+describe("SearchBar — UX-01: Clear-Button", () => {
+  it("kein Clear-Button wenn value leer", () => {
+    render(<SearchBar value="" onChange={() => {}} />);
+    expect(screen.queryByRole("button", { name: "Suche löschen" })).not.toBeInTheDocument();
+  });
+
+  it("Clear-Button erscheint wenn value nicht leer", () => {
+    render(<SearchBar value="Test" onChange={() => {}} />);
+    expect(screen.getByRole("button", { name: "Suche löschen" })).toBeInTheDocument();
+  });
+
+  it("Clear-Button hat aria-label 'Suche löschen'", () => {
+    render(<SearchBar value="Abc" onChange={() => {}} />);
+    expect(screen.getByRole("button", { name: "Suche löschen" })).toHaveAttribute("aria-label", "Suche löschen");
+  });
+
+  it("Klick auf Clear-Button ruft onChange mit leerem String auf", () => {
+    const onChange = vi.fn();
+    render(<SearchBar value="Routenzug A" onChange={onChange} />);
+    fireEvent.click(screen.getByRole("button", { name: "Suche löschen" }));
+    expect(onChange).toHaveBeenCalledWith("");
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("Clear-Button ruft onChange nicht ohne Klick auf", () => {
+    const onChange = vi.fn();
+    render(<SearchBar value="Text" onChange={onChange} />);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("value mit einzelnem Zeichen → Clear-Button sichtbar", () => {
+    render(<SearchBar value="x" onChange={() => {}} />);
+    expect(screen.getByRole("button", { name: "Suche löschen" })).toBeInTheDocument();
+  });
+
+  it("Search-Icon nicht sichtbar wenn value nicht leer (Clear ersetzt es)", () => {
+    render(<SearchBar value="x" onChange={() => {}} />);
+    const clearBtn = screen.getByRole("button", { name: "Suche löschen" });
+    expect(clearBtn).toBeInTheDocument();
+    expect(clearBtn).toContainHTML("×");
+  });
+});

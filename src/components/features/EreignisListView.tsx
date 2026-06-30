@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/ui-custom/SearchBar";
 import { FilterBadge } from "@/components/ui-custom/FilterBadge";
 import { ListHeader } from "@/components/ui-custom/ListHeader";
 import { EreignisListRow } from "@/components/features/EreignisListRow";
-import type { Ereignis } from "@/types/ereignis";
+import type { Ereignis, EreignisFilter } from "@/types/ereignis";
 import { PlusIcon } from "@/components/ui-custom/icons";
 
 function SaveIcon() {
@@ -22,6 +22,9 @@ interface EreignisListViewProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
   onRowClick?: (id: string) => void;
+  filter?: EreignisFilter;
+  onFilterOpen?: () => void;
+  onFilterRemove?: (key: keyof EreignisFilter) => void;
 }
 
 export function EreignisListView({
@@ -31,6 +34,9 @@ export function EreignisListView({
   searchValue,
   onSearchChange,
   onRowClick,
+  filter,
+  onFilterOpen,
+  onFilterRemove,
 }: EreignisListViewProps) {
   const filtered = ereignisse
     .filter((e) => {
@@ -42,6 +48,12 @@ export function EreignisListView({
       if (!searchValue) return true;
       const q = searchValue.toLowerCase();
       return e.art.toLowerCase().includes(q) || e.fahrzeug.toLowerCase().includes(q);
+    })
+    .filter((e) => {
+      if (filter?.status.length && !filter.status.includes(e.status)) return false;
+      if (filter?.priorität.length && !filter.priorität.includes(e.priorität)) return false;
+      if (filter?.fahrzeug && !e.fahrzeug.toLowerCase().includes(filter.fahrzeug.toLowerCase())) return false;
+      return true;
     });
 
   return (
@@ -60,11 +72,30 @@ export function EreignisListView({
       <hr className="border-t border-[#9A9EA0]" />
 
       <div className="flex items-center gap-2 py-2">
-        <FilterBadge header="Status:" text="alle" variant="auto-width" />
-        <FilterBadge header="Fahrzeug:" text="alle" variant="auto-width" />
+        {filter && filter.status.length > 0 ? (
+          <FilterBadge
+            header="Status:"
+            text={filter.status.join(", ")}
+            variant="selected"
+            onRemove={() => onFilterRemove?.("status")}
+          />
+        ) : (
+          <FilterBadge header="Status:" text="alle" variant="auto-width" />
+        )}
+        {filter && filter.fahrzeug ? (
+          <FilterBadge
+            header="Fahrzeug:"
+            text={filter.fahrzeug}
+            variant="selected"
+            onRemove={() => onFilterRemove?.("fahrzeug")}
+          />
+        ) : (
+          <FilterBadge header="Fahrzeug:" text="alle" variant="auto-width" />
+        )}
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
+            onClick={onFilterOpen}
             className="inline-flex items-center gap-1.5 h-[27px] px-3 rounded-[4px] bg-[rgba(20,106,161,0.1)] text-[#146AA1] font-semibold text-[15px]"
           >
             neuer Filter

@@ -17,15 +17,17 @@ Eine industrielle Logistik-Management-App für **Routenzüge (Tugger Trains)** i
 
 | Phase | Status |
 |---|---|
-| Design Audit | ✅ Abgeschlossen → `design-audit.md` |
+| Design Audit | ✅ → `design-audit.md` |
 | Architekturentscheidungen | ✅ Alle 5 entschieden → `decisions.md` |
-| Projekt-Setup (Claude-Struktur) | ✅ Abgeschlossen |
-| Git + GitHub | ✅ Verbunden, Branch `main` |
-| **Next.js Scaffold** | ✅ Abgeschlossen |
-| Design Tokens konfigurieren | ✅ Abgeschlossen (globals.css) |
-| Komponentenbibliothek (Sprint 1+2) | ✅ Abgeschlossen → `sprint-1.md`, `sprint-2.md` |
-| **Screens implementieren (Sprint 3)** | ✅ Abgeschlossen → `sprint-3.md` |
-| **Screens implementieren (Sprint 4)** | ⬅️ **Hier geht es weiter** → `sprint-4.md` |
+| Projekt-Setup + Scaffold + Tokens | ✅ |
+| Sprint 1–2 (Atoms, Molecules, Sidebar, Templates) | ✅ → `sprint-1.md`, `sprint-2.md` |
+| Sprint 3–6 (Ereignisse, Karte, Routenzug-Detail, Ereignis-Detail) | ✅ → `sprint-3.md` – `sprint-6.md` |
+| Sprint 7 (Tests & Edge Cases) | ✅ → `sprint-7.md` |
+| Sprint 8 (Refactoring) | ✅ → `sprint-8.md` |
+| Sprint 9 (Stub-Seiten: Aufträge, Einstellungen, Statistiken, Anzeigetafel) | ✅ → `sprint-9.md` |
+| Sprint 10 (Dark Mode, AuftraegePage, Stornieren-Bestätigung, Sidebar MA) | ✅ → `sprint-10.md` |
+| Sprint 11 (SearchBar Clear, Filter-Dialoge, Erstellen-Dialog) | ✅ → `sprint-11.md` |
+| **Sprint 12** (Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail) | ⬅️ **Hier geht es weiter** → `sprint-12.md` |
 
 ---
 
@@ -43,44 +45,15 @@ Details in `decisions.md`.
 
 ---
 
-## Nächster Schritt: Next.js Scaffold
-
-Das Projekt-Verzeichnis ist aktuell leer bis auf die Planungsdokumente. Der Scaffold muss noch erstellt werden.
-
-**Was zu tun ist:**
-1. `npx create-next-app@latest` mit diesen Optionen:
-   - TypeScript: **Ja**
-   - ESLint: **Ja**
-   - Tailwind CSS: **Ja**
-   - `src/` directory: **Ja**
-   - App Router: **Ja**
-   - Turbopack: **Ja**
-   - Import alias: **Ja** (`@/*`)
-
-2. `shadcn@latest init` ausführen
-
-3. `next-themes` installieren (Dark Mode, Entscheidung #4)
-
-4. `react-leaflet` + `leaflet` installieren (Karte, Entscheidung #1)
-
-5. Design Tokens aus `design-audit.md → Abschnitt 4` in `tailwind.config.ts` + `globals.css` eintragen
-
-6. Ordnerstruktur nach `CLAUDE.md → Projektstruktur` anlegen
-
-7. `middleware.ts` Grundgerüst für Rollenweiterleitung anlegen (Entscheidung #2)
-
----
-
 ## Wichtige Dateien
 
 | Datei | Inhalt |
 |---|---|
-| `CLAUDE.md` | Stack, Konventionen, Entscheidungsprozess — wird automatisch geladen |
+| `CLAUDE.md` | Stack, Konventionen, Sprint-Status — wird automatisch geladen |
 | `design-audit.md` | Screens-Inventar, Design Tokens, Komponenten-Mapping, Routing-Struktur |
-| `decisions.md` | Alle Architekturentscheidungen mit Begründung |
+| `decisions.md` | Alle 5 Architekturentscheidungen mit Begründung (alle abgeschlossen) |
 | `backlog.md` | 47 Tickets in 5 Schichten (AT/MO/OR/TM/SC) mit Figma-Refs |
-| `sprint-1.md` | **Aktueller Sprint** — 8 Tickets, vollständige Specs, kein Figma-MCP nötig |
-| `.mcp.json` | Figma MCP Server (`figma-developer-mcp`) |
+| `sprint-12.md` | **Aktueller Sprint** — 4 Tickets, vollständige Specs |
 | `.claude/settings.local.json` | Figma API Key — gitignored, nicht anfassen |
 
 ---

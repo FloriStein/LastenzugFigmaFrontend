@@ -26,20 +26,32 @@ Offene Entscheidungen immer zuerst in `decisions.md` nachschauen.
 4. **Routing & Flows** — App Router Seiten, Navigation, interaktive Zustände
 5. **Polish** — Responsive, Accessibility, Edge Cases
 
-## Projektstruktur (geplant)
+## Projektstruktur
 ```
 src/
   app/
-    (screens)/          # Route Groups pro Screen/Flow
-      [screen-name]/
-        page.tsx
+    (auth)/login/       # Login-Screen
+    (protected)/        # Alle geschützten Routen (Middleware-Guard)
+      auftraege/        # Auftragsübersicht + [id]/Detail
+      ereignisse/       # Ereignisübersicht + [id]/Detail
+      routenzug/[id]/   # Routenzug-Detail
+      karte/            # Kartenansicht
+      linien/           # Linienansicht
+      anzeigetafel/     # Anzeigetafel (Mitarbeiter)
+      statistiken/      # Statistiken (Schichtleitung)
+      einstellungen/    # Einstellungen
   components/
     ui/                 # shadcn/ui Basis-Komponenten (nicht manuell bearbeiten)
-    [feature]/          # Feature-spezifische zusammengesetzte Komponenten
+    ui-custom/          # Eigene Atom-Komponenten (SearchBar, FilterBadge, etc.)
+    features/           # Feature-Komponenten (ListViews, Dialoge, Panels)
+    layout/             # Shell- und Layout-Komponenten (Sidebar, DetailShell)
   lib/
-    utils.ts            # cn() und sonstige Hilfsfunktionen
+    utils.ts            # cn() und Hilfsfunktionen
+  types/
+    auftrag.ts          # Auftrag, AuftragStatus, AuftragTab, AuftragFilter
+    ereignis.ts         # Ereignis, EreignisStatus, EreignisFilter
   styles/
-    globals.css
+    globals.css         # Design Tokens als CSS-Variablen, Dark Mode
 ```
 
 ## Konventionen
@@ -71,9 +83,19 @@ Werden nach dem Design Audit in `tailwind.config.ts` eingetragen:
 - Spacing-Werte (sofern vom Figma-Standard abweichend)
 
 ## Status
-- [x] Design Audit (Figma → Screens & Tokens inventarisieren) → `design-audit.md`
-- [ ] Projekt-Scaffold (Next.js + shadcn/ui)
-- [ ] Design Tokens konfigurieren
-- [ ] Komponentenbibliothek aufbauen
-- [ ] Screens implementieren
-- [ ] Flows & Navigation verdrahten
+
+| Sprint | Inhalt | Status |
+|---|---|---|
+| Setup | Design Audit, Entscheidungen, Scaffold, Tokens | ✅ |
+| Sprint 1 | Atoms + Nav-Molecules | ✅ |
+| Sprint 2 | Sidebar-Organisms + Layout-Templates | ✅ |
+| Sprint 3 | Ereignisansicht (SC-03) | ✅ |
+| Sprint 4 | Kartenansicht (SC-02) | ✅ |
+| Sprint 5 | Ereignis-Detail (SC-07) | ✅ |
+| Sprint 6 | Routenzug-Detail (SC-05) | ✅ |
+| Sprint 7 | Tests & Edge Cases | ✅ |
+| Sprint 8 | Refactoring & Bereinigung | ✅ |
+| Sprint 9 | Stub-Seiten ausgebaut (AT-01, EI-01, ST-01, ANZ-01) | ✅ |
+| Sprint 10 | Dark Mode, AuftraegePage, Stornieren-Bestätigung, Sidebar MA | ✅ |
+| Sprint 11 | SearchBar Clear, Filter-Dialoge (Ereignisse/Aufträge), Erstellen-Dialog | ✅ |
+| Sprint 12 | Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail Status-Workflow | ⬅️ offen |

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -13,7 +14,7 @@ import {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-[10px] p-6 flex flex-col gap-6">
+    <div className="bg-background rounded-[10px] p-6 flex flex-col gap-6">
       <h2 className="text-[20px] font-semibold">{title}</h2>
       {children}
     </div>
@@ -96,6 +97,7 @@ const KÜRZEL_GRUPPEN = [
 ];
 
 export default function EinstellungenPage() {
+  const { theme, setTheme } = useTheme();
   const [lautstärke, setLautstärke] = useState(48);
   const [benachrichtigungen, setBenachrichtigungen] = useState(40);
   const [fahrgastkommunikation, setFahrgastkommunikation] = useState(60);
@@ -118,12 +120,14 @@ export default function EinstellungenPage() {
             <h3 className="text-[16px] font-semibold text-[#646A79] uppercase tracking-wide">Aussehen</h3>
             <div className="flex items-center gap-4">
               <span className="text-[15px] text-dark-surface">Theme</span>
-              <Select defaultValue="hell">
+              <Select value={theme ?? "light"} onValueChange={(v) => v !== null && setTheme(v)}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hell">Hell</SelectItem>
+                  <SelectItem value="light">Hell</SelectItem>
+                  <SelectItem value="dark">Dunkel</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
                 </SelectContent>
               </Select>
             </div>

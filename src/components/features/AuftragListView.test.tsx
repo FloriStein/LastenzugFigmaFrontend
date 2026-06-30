@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { AuftragListView } from "./AuftragListView";
+import type { AuftragFilter } from "@/types/auftrag";
 
 const MOCK_AUFTRÄGE = [
   {
@@ -168,5 +169,139 @@ describe("AuftragListView — Edge Cases", () => {
   it("einziger Auftrag bleibt nach Suche sichtbar", () => {
     render(<AuftragListView {...BASE_PROPS} aufträge={[MOCK_AUFTRÄGE[0]]} searchValue="AUF" />);
     expect(screen.getByText("AUF-001")).toBeInTheDocument();
+  });
+});
+
+const EMPTY_FILTER: AuftragFilter = { status: [], art: [] };
+
+describe("AuftragListView — FD-02: Filter nach AuftragFilter", () => {
+  it("kein filter-Prop → alle Aufträge sichtbar", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.getByText("AUF-001")).toBeInTheDocument();
+    expect(screen.getByText("AUF-002")).toBeInTheDocument();
+    expect(screen.getByText("AUF-003")).toBeInTheDocument();
+  });
+
+  it("filter.status=['aktiv'] → nur aktive Aufträge", () => {
+    render(<AuftragListView {...BASE_PROPS} filter={{ ...EMPTY_FILTER, status: ["aktiv"] }} />);
+    expect(screen.getByText("AUF-001")).toBeInTheDocument();
+    expect(screen.queryByText("AUF-002")).not.toBeInTheDocument();
+    expect(screen.queryByText("AUF-003")).not.toBeInTheDocument();
+  });
+
+  it("filter.status=['geplant','unterbrochen'] → AUF-002 und AUF-003", () => {
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        filter={{ ...EMPTY_FILTER, status: ["geplant", "unterbrochen"] }}
+      />
+    );
+    expect(screen.queryByText("AUF-001")).not.toBeInTheDocument();
+    expect(screen.getByText("AUF-002")).toBeInTheDocument();
+    expect(screen.getByText("AUF-003")).toBeInTheDocument();
+  });
+
+  it("filter.art=['Leerfahrt'] → nur AUF-003", () => {
+    render(<AuftragListView {...BASE_PROPS} filter={{ ...EMPTY_FILTER, art: ["Leerfahrt"] }} />);
+    expect(screen.queryByText("AUF-001")).not.toBeInTheDocument();
+    expect(screen.queryByText("AUF-002")).not.toBeInTheDocument();
+    expect(screen.getByText("AUF-003")).toBeInTheDocument();
+  });
+
+  it("filter.art=['Lieferauftrag','Mitarbeitertransport'] → AUF-001 und AUF-002", () => {
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        filter={{ ...EMPTY_FILTER, art: ["Lieferauftrag", "Mitarbeitertransport"] }}
+      />
+    );
+    expect(screen.getByText("AUF-001")).toBeInTheDocument();
+    expect(screen.getByText("AUF-002")).toBeInTheDocument();
+    expect(screen.queryByText("AUF-003")).not.toBeInTheDocument();
+  });
+
+  it("kombination status + art → nur Schnittmenge", () => {
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        filter={{ status: ["aktiv"], art: ["Mitarbeitertransport"] }}
+      />
+    );
+    expect(screen.queryByText("AUF-001")).not.toBeInTheDocument();
+    expect(screen.queryByText("AUF-002")).not.toBeInTheDocument();
+    expect(screen.getByText("Keine Aufträge gefunden.")).toBeInTheDocument();
+  });
+
+  it("Tab-Filter + AuftragFilter kombinieren sich", () => {
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        activeTab="archiv"
+        filter={{ ...EMPTY_FILTER, art: ["Leerfahrt"] }}
+      />
+    );
+    expect(screen.getByText("AUF-003")).toBeInTheDocument();
+    expect(screen.queryByText("AUF-002")).not.toBeInTheDocument();
+  });
+});
+
+describe("AuftragListView — FD-02: Filter-Badges & Callbacks", () => {
+  it("zeigt 'neuer Filter' Button", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.getByRole("button", { name: /neuer Filter/i })).toBeInTheDocument();
+  });
+
+  it("'neuer Filter' ruft onFilterOpen auf", () => {
+    const onFilterOpen = vi.fn();
+    render(<AuftragListView {...BASE_PROPS} onFilterOpen={onFilterOpen} />);
+    fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }));
+    expect(onFilterOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("kein onFilterOpen → kein Fehler bei Klick", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(() => fireEvent.click(screen.getByRole("button", { name: /neuer Filter/i }))).not.toThrow();
+  });
+
+  it("filter.status=['aktiv'] → Status-Badge zeigt 'aktiv'", () => {
+    render(<AuftragListView {...BASE_PROPS} filter={{ ...EMPTY_FILTER, status: ["aktiv"] }} />);
+    const badge = screen.getAllByRole("button").find(
+      (b) => b.textContent?.includes("Status:") && b.textContent?.includes("aktiv")
+    );
+    expect(badge).toBeInTheDocument();
+  });
+
+  it("filter.art=['Leerfahrt'] → Art-Badge zeigt 'Leerfahrt'", () => {
+    render(<AuftragListView {...BASE_PROPS} filter={{ ...EMPTY_FILTER, art: ["Leerfahrt"] }} />);
+    const badge = screen.getAllByRole("button").find(
+      (b) => b.textContent?.includes("Art:") && b.textContent?.includes("Leerfahrt")
+    );
+    expect(badge).toBeInTheDocument();
+  });
+
+  it("onFilterRemove('status') aufgerufen wenn Status-Badge × geklickt", () => {
+    const onFilterRemove = vi.fn();
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        filter={{ ...EMPTY_FILTER, status: ["aktiv"] }}
+        onFilterRemove={onFilterRemove}
+      />
+    );
+    fireEvent.click(screen.getAllByRole("button", { name: "×" })[0]);
+    expect(onFilterRemove).toHaveBeenCalledWith("status");
+  });
+
+  it("onFilterRemove('art') aufgerufen wenn Art-Badge × geklickt", () => {
+    const onFilterRemove = vi.fn();
+    render(
+      <AuftragListView
+        {...BASE_PROPS}
+        filter={{ ...EMPTY_FILTER, art: ["Leerfahrt"] }}
+        onFilterRemove={onFilterRemove}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "×" }));
+    expect(onFilterRemove).toHaveBeenCalledWith("art");
   });
 });

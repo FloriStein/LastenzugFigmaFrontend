@@ -12,3 +12,13 @@ export interface Auftrag {
   status: AuftragStatus;
   ankunft: string;
 }
+
+export type AuftragFilter = {
+  status: AuftragStatus[];
+  art: string[];
+};
+
+export const EMPTY_AUFTRAG_FILTER: AuftragFilter = {
+  status: [],
+  art: [],
+};
