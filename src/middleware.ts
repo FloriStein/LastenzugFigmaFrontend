@@ -8,6 +8,13 @@ const ROLE_REDIRECT: Record<Role, string> = {
   gast: "/statistiken",
 };
 
+const ALLOWED_PATHS: Record<Role, string[]> = {
+  operator:       ["/karte", "/linien", "/ereignisse", "/auftraege", "/routenzug", "/einstellungen"],
+  schichtleitung: ["/ereignisse", "/auftraege", "/karte", "/linien", "/statistiken", "/einstellungen"],
+  mitarbeiter:    ["/auftraege", "/linien", "/anzeigetafel", "/einstellungen"],
+  gast:           ["/statistiken", "/einstellungen"],
+};
+
 const PUBLIC_PATHS = ["/login"];
 
 function parseJwtPayload(token: string): { role?: Role } | null {
@@ -45,10 +52,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  const role = payload.role;
+
   if (pathname === "/") {
-    return NextResponse.redirect(
-      new URL(ROLE_REDIRECT[payload.role] ?? "/login", request.url)
-    );
+    return NextResponse.redirect(new URL(ROLE_REDIRECT[role], request.url));
+  }
+
+  if (!ALLOWED_PATHS[role].some((p) => pathname.startsWith(p))) {
+    return NextResponse.redirect(new URL(ROLE_REDIRECT[role], request.url));
   }
 
   return passThrough(request);

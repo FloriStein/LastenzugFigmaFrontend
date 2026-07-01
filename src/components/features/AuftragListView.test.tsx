@@ -62,9 +62,14 @@ describe("AuftragListView — Grundstruktur", () => {
     expect(screen.getByRole("tab", { name: "Archiv" })).toBeInTheDocument();
   });
 
-  it("zeigt 'Lieferauftrag erstellen' Button", () => {
-    render(<AuftragListView {...BASE_PROPS} />);
+  it("zeigt 'Lieferauftrag erstellen' Button wenn onNeuErstellen angegeben", () => {
+    render(<AuftragListView {...BASE_PROPS} onNeuErstellen={vi.fn()} />);
     expect(screen.getByRole("button", { name: /lieferauftrag erstellen/i })).toBeInTheDocument();
+  });
+
+  it("kein 'Lieferauftrag erstellen' Button ohne onNeuErstellen", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.queryByRole("button", { name: /lieferauftrag erstellen/i })).not.toBeInTheDocument();
   });
 
   it("zeigt Spalten-Header 'ID'", () => {
@@ -159,11 +164,9 @@ describe("AuftragListView — Edge Cases", () => {
     expect(() => fireEvent.click(screen.getAllByRole("row")[0])).not.toThrow();
   });
 
-  it("kein onNeuErstellen → kein Fehler bei Klick auf 'Erstellen'", () => {
+  it("kein onNeuErstellen → 'Lieferauftrag erstellen' Button nicht gerendert", () => {
     render(<AuftragListView {...BASE_PROPS} />);
-    expect(() =>
-      fireEvent.click(screen.getByRole("button", { name: /lieferauftrag erstellen/i }))
-    ).not.toThrow();
+    expect(screen.queryByRole("button", { name: /lieferauftrag erstellen/i })).not.toBeInTheDocument();
   });
 
   it("einziger Auftrag bleibt nach Suche sichtbar", () => {
@@ -303,5 +306,78 @@ describe("AuftragListView — FD-02: Filter-Badges & Callbacks", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "×" }));
     expect(onFilterRemove).toHaveBeenCalledWith("art");
+  });
+});
+
+describe("AuftragListView — MA-01: Mitarbeiter-Modus", () => {
+  it("showMeineTab=false → kein 'Meine Lieferungen' Tab", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.queryByRole("tab", { name: "Meine Lieferungen" })).not.toBeInTheDocument();
+  });
+
+  it("showMeineTab=true → zeigt Tab 'Meine Lieferungen'", () => {
+    render(<AuftragListView {...BASE_PROPS} showMeineTab />);
+    expect(screen.getByRole("tab", { name: "Meine Lieferungen" })).toBeInTheDocument();
+  });
+
+  it("showMeineTab=true → alle 4 Tabs vorhanden", () => {
+    render(<AuftragListView {...BASE_PROPS} showMeineTab />);
+    expect(screen.getByRole("tab", { name: "Alle" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Meine Lieferungen" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Offen" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Archiv" })).toBeInTheDocument();
+  });
+
+  it("Tab 'Meine Lieferungen' zeigt alle Aufträge (kein Filter für Mock)", () => {
+    render(<AuftragListView {...BASE_PROPS} showMeineTab activeTab="meine-lieferungen" />);
+    expect(screen.getByText("AUF-001")).toBeInTheDocument();
+    expect(screen.getByText("AUF-002")).toBeInTheDocument();
+    expect(screen.getByText("AUF-003")).toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=true → Header 'Enthaltene Artikel' statt 'Von / Ab'", () => {
+    render(<AuftragListView {...BASE_PROPS} showArtikelSpalte />);
+    expect(screen.getByText("Enthaltene Artikel")).toBeInTheDocument();
+    expect(screen.queryByText("Von / Ab")).not.toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=true → Header 'Ziel / Endhaltestelle' statt 'Ziel'", () => {
+    render(<AuftragListView {...BASE_PROPS} showArtikelSpalte />);
+    expect(screen.getByText("Ziel / Endhaltestelle")).toBeInTheDocument();
+    expect(screen.queryByText("Ziel")).not.toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=false → normale Header 'Von / Ab' und 'Ziel'", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.getByText("Von / Ab")).toBeInTheDocument();
+    expect(screen.getByText("Ziel")).toBeInTheDocument();
+    expect(screen.queryByText("Enthaltene Artikel")).not.toBeInTheDocument();
+  });
+
+  it("onSaveView → zeigt 'als Ansicht speichern' Button", () => {
+    render(<AuftragListView {...BASE_PROPS} onSaveView={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /als Ansicht speichern/i })).toBeInTheDocument();
+  });
+
+  it("kein onSaveView → kein 'als Ansicht speichern' Button", () => {
+    render(<AuftragListView {...BASE_PROPS} />);
+    expect(screen.queryByRole("button", { name: /als Ansicht speichern/i })).not.toBeInTheDocument();
+  });
+
+  it("'als Ansicht speichern' ruft onSaveView auf", () => {
+    const onSaveView = vi.fn();
+    render(<AuftragListView {...BASE_PROPS} onSaveView={onSaveView} />);
+    fireEvent.click(screen.getByRole("button", { name: /als Ansicht speichern/i }));
+    expect(onSaveView).toHaveBeenCalledTimes(1);
+  });
+
+  it("Suche nach Auftraggeber funktioniert wenn Felder optional", () => {
+    const mitArtikel = [
+      { ...MOCK_AUFTRÄGE[0], auftraggeber: "Jonas Muster", enthalteneArtikel: "Teil X" },
+      { ...MOCK_AUFTRÄGE[1], auftraggeber: "Sabine M.", enthalteneArtikel: "Teil Y" },
+    ];
+    render(<AuftragListView {...BASE_PROPS} aufträge={mitArtikel} searchValue="Jonas" />);
+    expect(screen.getByText("AUF-001")).toBeInTheDocument();
+    expect(screen.queryByText("AUF-002")).not.toBeInTheDocument();
   });
 });

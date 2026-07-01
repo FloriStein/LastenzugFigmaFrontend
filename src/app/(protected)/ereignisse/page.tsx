@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EreignisListView } from "@/components/features/EreignisListView";
 import { EreignisFilterDialog } from "@/components/features/EreignisFilterDialog";
+import { useRole } from "@/lib/useRole";
 import type { Ereignis, EreignisFilter } from "@/types/ereignis";
 import { EMPTY_EREIGNIS_FILTER } from "@/types/ereignis";
 
@@ -14,25 +15,28 @@ const MOCK_EREIGNISSE: Ereignis[] = [
     id: "#103",
     art: "Kommunikationsanfrage",
     fahrzeug: "Routenzug B",
-    status: "neu",
+    status: "in-bearbeitung",
     priorität: 4,
     erstelltAt: "16:04 Uhr",
+    betroffen: "Mitarbeitertransport",
   },
   {
     id: "#102",
     art: "Strecke blockiert",
-    fahrzeug: "Routenzug A",
+    fahrzeug: "Routenzug B",
     status: "neu",
     priorität: 3,
     erstelltAt: "14:28 Uhr",
+    betroffen: "Produktion A, Mitarbeitertransport",
   },
   {
     id: "#101",
     art: "Verlassen Betriebsgelände",
-    fahrzeug: "Routenzug B",
+    fahrzeug: "Routenzug C",
     status: "neu",
     priorität: 1,
     erstelltAt: "16:02 Uhr",
+    betroffen: "Produktion D",
   },
   {
     id: "#100",
@@ -74,6 +78,8 @@ const MOCK_EREIGNISSE: Ereignis[] = [
 function EreignissePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const role = useRole();
+  const isSL = role === "schichtleitung";
   const tabParam = searchParams.get("tab");
   const initialTab: TabType =
     tabParam === "offen" || tabParam === "archiv" ? tabParam : "alle";
@@ -101,6 +107,8 @@ function EreignissePageContent() {
               [key]: Array.isArray(prev[key]) ? [] : "",
             }))
           }
+          showBetroffen={isSL}
+          onSaveView={isSL ? () => {} : undefined}
         />
       </main>
       <EreignisFilterDialog

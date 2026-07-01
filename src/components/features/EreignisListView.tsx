@@ -25,6 +25,8 @@ interface EreignisListViewProps {
   filter?: EreignisFilter;
   onFilterOpen?: () => void;
   onFilterRemove?: (key: keyof EreignisFilter) => void;
+  showBetroffen?: boolean;
+  onSaveView?: () => void;
 }
 
 export function EreignisListView({
@@ -37,6 +39,8 @@ export function EreignisListView({
   filter,
   onFilterOpen,
   onFilterRemove,
+  showBetroffen,
+  onSaveView,
 }: EreignisListViewProps) {
   const filtered = ereignisse
     .filter((e) => {
@@ -69,7 +73,7 @@ export function EreignisListView({
         <SearchBar value={searchValue} onChange={onSearchChange} size="small" />
       </div>
 
-      <hr className="border-t border-[#9A9EA0]" />
+      <hr className="border-t border-gray-muted" />
 
       <div className="flex items-center gap-2 py-2">
         {filter && filter.status.length > 0 ? (
@@ -96,30 +100,41 @@ export function EreignisListView({
           <button
             type="button"
             onClick={onFilterOpen}
-            className="inline-flex items-center gap-1.5 h-[27px] px-3 rounded-[4px] bg-[rgba(20,106,161,0.1)] text-[#146AA1] font-semibold text-[15px]"
+            className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
           >
             neuer Filter
             <PlusIcon />
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 h-[27px] px-3 rounded-[4px] bg-[rgba(20,106,161,0.1)] text-[#146AA1] font-semibold text-[15px]"
-          >
-            als Ansicht speichern
-            <SaveIcon />
-          </button>
+          {showBetroffen && onSaveView && (
+            <button
+              type="button"
+              onClick={onSaveView}
+              className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
+            >
+              als Ansicht speichern
+              <SaveIcon />
+            </button>
+          )}
         </div>
       </div>
 
-      <hr className="border-t border-[#9A9EA0]" />
+      <hr className="border-t border-gray-muted" />
 
-      <div className="grid grid-cols-[153px_300px_227px_228px_225px_226px_1fr] items-center h-[18px] mt-3 mb-2">
+      <div
+        className="grid items-center h-4.5 mt-3 mb-2"
+        style={{
+          gridTemplateColumns: showBetroffen
+            ? "153px 300px 227px 228px 225px 226px 250px 1fr"
+            : "153px 300px 227px 228px 225px 226px 1fr",
+        }}
+      >
         <ListHeader label="Ereignis-ID" sort="none" />
         <ListHeader label="Ereignisart" sort="none" />
         <ListHeader label="Fahrzeug" sort="none" />
         <ListHeader label="Status" sort="none" />
         <ListHeader label="Bearbeiter" sort="none" />
         <ListHeader label="Priorität" sort="none" />
+        {showBetroffen && <ListHeader label="Betroffen" sort="none" />}
         <ListHeader label="Erstellt" sort="none" />
       </div>
 
@@ -135,6 +150,8 @@ export function EreignisListView({
             priorität={e.priorität}
             erstelltAt={e.erstelltAt}
             onClick={onRowClick ? () => onRowClick(e.id) : undefined}
+            showBetroffen={showBetroffen}
+            betroffen={e.betroffen}
           />
         ))}
       </div>

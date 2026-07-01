@@ -17,6 +17,9 @@ interface AuftragListViewProps {
   filter?: AuftragFilter;
   onFilterOpen?: () => void;
   onFilterRemove?: (key: keyof AuftragFilter) => void;
+  showMeineTab?: boolean;
+  showArtikelSpalte?: boolean;
+  onSaveView?: () => void;
 }
 
 export function AuftragListView({
@@ -30,6 +33,9 @@ export function AuftragListView({
   filter,
   onFilterOpen,
   onFilterRemove,
+  showMeineTab,
+  showArtikelSpalte,
+  onSaveView,
 }: AuftragListViewProps) {
   const filtered = aufträge
     .filter((a) => {
@@ -42,13 +48,13 @@ export function AuftragListView({
       const q = searchValue.toLowerCase();
       return (
         a.id.toLowerCase().includes(q) ||
-        a.art.toLowerCase().includes(q) ||
-        a.auftraggeber.toLowerCase().includes(q)
+        (a.art ?? "").toLowerCase().includes(q) ||
+        (a.auftraggeber ?? "").toLowerCase().includes(q)
       );
     })
     .filter((a) => {
       if (filter?.status.length && !filter.status.includes(a.status)) return false;
-      if (filter?.art.length && !filter.art.includes(a.art)) return false;
+      if (filter?.art.length && !filter.art.includes(a.art ?? "")) return false;
       return true;
     });
 
@@ -58,20 +64,25 @@ export function AuftragListView({
         <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as AuftragTab)}>
           <TabsList className="bg-transparent p-0 h-auto gap-6">
             <TabsTrigger value="alle" className="px-0 pb-2">Alle</TabsTrigger>
+            {showMeineTab && (
+              <TabsTrigger value="meine-lieferungen" className="px-0 pb-2">Meine Lieferungen</TabsTrigger>
+            )}
             <TabsTrigger value="offen" className="px-0 pb-2">Offen</TabsTrigger>
             <TabsTrigger value="archiv" className="px-0 pb-2">Archiv</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="flex items-center gap-2">
           <SearchBar value={searchValue} onChange={onSearchChange} size="small" />
-          <button
-            type="button"
-            onClick={onNeuErstellen}
-            className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
-          >
-            Lieferauftrag erstellen
-            <PlusIcon />
-          </button>
+          {onNeuErstellen && (
+            <button
+              type="button"
+              onClick={onNeuErstellen}
+              className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
+            >
+              Lieferauftrag erstellen
+              <PlusIcon />
+            </button>
+          )}
         </div>
       </div>
 
@@ -107,6 +118,15 @@ export function AuftragListView({
             neuer Filter
             <PlusIcon />
           </button>
+          {onSaveView && (
+            <button
+              type="button"
+              onClick={onSaveView}
+              className="inline-flex items-center gap-1.5 h-6.75 px-3 rounded-lg bg-[rgba(20,106,161,0.1)] text-blue-primary font-semibold text-[15px]"
+            >
+              als Ansicht speichern
+            </button>
+          )}
         </div>
       </div>
 
@@ -116,8 +136,8 @@ export function AuftragListView({
         <ListHeader label="ID" sort="none" />
         <ListHeader label="Linie" sort="none" />
         <ListHeader label="Art" sort="none" />
-        <ListHeader label="Von / Ab" sort="none" />
-        <ListHeader label="Ziel" sort="none" />
+        <ListHeader label={showArtikelSpalte ? "Enthaltene Artikel" : "Von / Ab"} sort="none" />
+        <ListHeader label={showArtikelSpalte ? "Ziel / Endhaltestelle" : "Ziel"} sort="none" />
         <ListHeader label="Auftraggeber" sort="none" />
         <ListHeader label="Status / Ankunft" sort="none" />
       </div>
@@ -127,6 +147,7 @@ export function AuftragListView({
           <AuftragListRow
             key={a.id}
             {...a}
+            showArtikelSpalte={showArtikelSpalte}
             onClick={onRowClick ? () => onRowClick(a.id) : undefined}
           />
         ))}

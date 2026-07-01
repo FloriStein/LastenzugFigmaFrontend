@@ -12,6 +12,7 @@ export interface Ereignis {
   bearbeiter?: string;
   priorität: 1 | 2 | 3 | 4;
   erstelltAt: string;
+  betroffen?: string;
 }
 
 export type EreignisFilter = {

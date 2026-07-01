@@ -92,3 +92,104 @@ describe("OR-01 — Middleware — Public Paths passieren ohne Token", () => {
     expect(res.headers.get("x-next-pathname")).toBe("/login");
   });
 });
+
+describe("RG-01 — Middleware — Pfad-Zugriffskontrolle Operator", () => {
+  it.each(["/karte", "/linien", "/ereignisse", "/auftraege", "/einstellungen"])(
+    "Operator darf %s aufrufen (kein Redirect)",
+    (path) => {
+      const token = makeToken({ role: "operator" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it.each(["/statistiken", "/anzeigetafel"])(
+    "Operator wird von %s auf /karte umgeleitet",
+    (path) => {
+      const token = makeToken({ role: "operator" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toContain("/karte");
+    }
+  );
+
+  it("x-next-pathname wird für erlaubte Operator-Pfade gesetzt", () => {
+    const token = makeToken({ role: "operator" });
+    const res = middleware(makeRequest("/karte", token));
+    expect(res.headers.get("x-next-pathname")).toBe("/karte");
+  });
+});
+
+describe("RG-01 — Middleware — Pfad-Zugriffskontrolle Schichtleitung", () => {
+  it.each(["/ereignisse", "/auftraege", "/karte", "/statistiken", "/einstellungen"])(
+    "Schichtleitung darf %s aufrufen (kein Redirect)",
+    (path) => {
+      const token = makeToken({ role: "schichtleitung" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it("Schichtleitung wird von /anzeigetafel auf /ereignisse umgeleitet", () => {
+    const token = makeToken({ role: "schichtleitung" });
+    const res = middleware(makeRequest("/anzeigetafel", token));
+    expect(res.headers.get("location")).toContain("/ereignisse");
+  });
+
+  it("Schichtleitung darf /linien aufrufen", () => {
+    const token = makeToken({ role: "schichtleitung" });
+    const res = middleware(makeRequest("/linien", token));
+    expect(res.headers.get("location")).toBeNull();
+  });
+});
+
+describe("RG-01 — Middleware — Pfad-Zugriffskontrolle Mitarbeiter", () => {
+  it.each(["/auftraege", "/linien", "/anzeigetafel", "/einstellungen"])(
+    "Mitarbeiter darf %s aufrufen (kein Redirect)",
+    (path) => {
+      const token = makeToken({ role: "mitarbeiter" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it.each(["/karte", "/ereignisse", "/statistiken"])(
+    "Mitarbeiter wird von %s auf /auftraege umgeleitet",
+    (path) => {
+      const token = makeToken({ role: "mitarbeiter" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toContain("/auftraege");
+    }
+  );
+
+  it("Mitarbeiter darf /auftraege/123 (Unterroute) aufrufen", () => {
+    const token = makeToken({ role: "mitarbeiter" });
+    const res = middleware(makeRequest("/auftraege/123", token));
+    expect(res.headers.get("location")).toBeNull();
+  });
+});
+
+describe("RG-01 — Middleware — Pfad-Zugriffskontrolle Gast", () => {
+  it.each(["/statistiken", "/einstellungen"])(
+    "Gast darf %s aufrufen (kein Redirect)",
+    (path) => {
+      const token = makeToken({ role: "gast" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it.each(["/karte", "/ereignisse", "/auftraege", "/anzeigetafel"])(
+    "Gast wird von %s auf /statistiken umgeleitet",
+    (path) => {
+      const token = makeToken({ role: "gast" });
+      const res = middleware(makeRequest(path, token));
+      expect(res.headers.get("location")).toContain("/statistiken");
+    }
+  );
+
+  it("Gast darf /linien NICHT aufrufen → /statistiken", () => {
+    const token = makeToken({ role: "gast" });
+    const res = middleware(makeRequest("/linien", token));
+    expect(res.headers.get("location")).toContain("/statistiken");
+  });
+});

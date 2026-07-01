@@ -139,10 +139,14 @@ describe("EreignisListView — Spaltenheader & Toolbar", () => {
     expect(screen.getByText("Fahrzeug:")).toBeInTheDocument();
   });
 
-  it('zeigt "neuer Filter" und "als Ansicht speichern" Buttons', () => {
+  it('zeigt "neuer Filter" Button', () => {
     renderView();
     expect(screen.getByText("neuer Filter")).toBeInTheDocument();
-    expect(screen.getByText("als Ansicht speichern")).toBeInTheDocument();
+  });
+
+  it('"als Ansicht speichern" nicht sichtbar ohne showBetroffen+onSaveView', () => {
+    renderView();
+    expect(screen.queryByText("als Ansicht speichern")).not.toBeInTheDocument();
   });
 });
 
@@ -318,5 +322,83 @@ describe("EreignisListView — FD-01: Filter-Badges & Callbacks", () => {
     const removeButton = screen.getByRole("button", { name: "×" });
     fireEvent.click(removeButton);
     expect(onFilterRemove).toHaveBeenCalledWith("fahrzeug");
+  });
+});
+
+const SL_MOCK: Ereignis[] = [
+  {
+    id: "#103", art: "Kommunikationsanfrage", fahrzeug: "Routenzug B",
+    status: "neu", priorität: 4, erstelltAt: "16:04 Uhr",
+    betroffen: "Mitarbeitertransport",
+  },
+  {
+    id: "#102", art: "Strecke blockiert", fahrzeug: "Routenzug A",
+    status: "neu", priorität: 3, erstelltAt: "14:28 Uhr",
+    betroffen: "Produktion A",
+  },
+  {
+    id: "#100", art: "Sensordefekt", fahrzeug: "Routenzug A",
+    status: "neu", priorität: 3, erstelltAt: "16:00 Uhr",
+  },
+];
+
+describe("EreignisListView — SL-01: Schichtleitungs-Modus", () => {
+  it("showBetroffen=true → zeigt Spaltenheader 'Betroffen'", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true });
+    expect(screen.getByText("Betroffen")).toBeInTheDocument();
+  });
+
+  it("showBetroffen=false → kein Spaltenheader 'Betroffen'", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: false });
+    expect(screen.queryByText("Betroffen")).not.toBeInTheDocument();
+  });
+
+  it("kein showBetroffen-Prop → kein Spaltenheader 'Betroffen'", () => {
+    renderView({ ereignisse: SL_MOCK });
+    expect(screen.queryByText("Betroffen")).not.toBeInTheDocument();
+  });
+
+  it("showBetroffen=true + onSaveView → zeigt 'als Ansicht speichern' Button", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true, onSaveView: vi.fn() });
+    expect(screen.getByText("als Ansicht speichern")).toBeInTheDocument();
+  });
+
+  it("showBetroffen=true ohne onSaveView → kein 'als Ansicht speichern'", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true });
+    expect(screen.queryByText("als Ansicht speichern")).not.toBeInTheDocument();
+  });
+
+  it("showBetroffen=false + onSaveView → kein 'als Ansicht speichern'", () => {
+    renderView({ ereignisse: SL_MOCK, onSaveView: vi.fn() });
+    expect(screen.queryByText("als Ansicht speichern")).not.toBeInTheDocument();
+  });
+
+  it("'als Ansicht speichern' ruft onSaveView auf", () => {
+    const onSaveView = vi.fn();
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true, onSaveView });
+    fireEvent.click(screen.getByText("als Ansicht speichern"));
+    expect(onSaveView).toHaveBeenCalledTimes(1);
+  });
+
+  it("betroffen-Werte der Zeilen sichtbar wenn showBetroffen=true", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true });
+    expect(screen.getByText("Mitarbeitertransport")).toBeInTheDocument();
+    expect(screen.getByText("Produktion A")).toBeInTheDocument();
+  });
+
+  it("Zeile ohne betroffen → '—' wenn showBetroffen=true", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true });
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("betroffen-Werte NICHT sichtbar wenn showBetroffen=false", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: false });
+    expect(screen.queryByText("Mitarbeitertransport")).not.toBeInTheDocument();
+  });
+
+  it("showBetroffen ändert Tab-/Such-Filterung nicht", () => {
+    renderView({ ereignisse: SL_MOCK, showBetroffen: true, searchValue: "Strecke" });
+    expect(screen.getByText("#102")).toBeInTheDocument();
+    expect(screen.queryByText("#103")).not.toBeInTheDocument();
   });
 });

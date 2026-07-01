@@ -1,16 +1,17 @@
 export type AuftragStatus = "aktiv" | "geplant" | "unterbrochen";
-export type AuftragTab = "alle" | "offen" | "archiv";
+export type AuftragTab = "alle" | "meine-lieferungen" | "offen" | "archiv";
 
 export interface Auftrag {
   id: string;
   linie?: string;
-  art: string;
-  von: string;
-  ab: string;
-  ziel: string;
-  auftraggeber: string;
+  art?: string;
+  von?: string;
+  ab?: string;
+  ziel?: string;
+  auftraggeber?: string;
   status: AuftragStatus;
-  ankunft: string;
+  ankunft?: string;
+  enthalteneArtikel?: string;
 }
 
 export type AuftragFilter = {

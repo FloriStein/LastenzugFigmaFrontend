@@ -11,6 +11,8 @@ interface EreignisListRowProps {
   priorität: 1 | 2 | 3 | 4;
   erstelltAt: string;
   onClick?: () => void;
+  showBetroffen?: boolean;
+  betroffen?: string;
 }
 
 export function EreignisListRow({
@@ -22,6 +24,8 @@ export function EreignisListRow({
   priorität,
   erstelltAt,
   onClick,
+  showBetroffen,
+  betroffen,
 }: EreignisListRowProps) {
   const isActive = status === "neu" || status === "warten";
 
@@ -30,7 +34,10 @@ export function EreignisListRow({
       role="row"
       onClick={onClick}
       className={cn(
-        "grid grid-cols-[153px_300px_227px_228px_225px_226px_1fr] items-center h-[48px]",
+        showBetroffen
+          ? "grid grid-cols-[153px_300px_227px_228px_225px_226px_250px_1fr]"
+          : "grid grid-cols-[153px_300px_227px_228px_225px_226px_1fr]",
+        "items-center h-12",
         "w-full rounded-[10px] bg-[rgba(158,172,182,0.1)]",
         isActive ? "text-black" : "text-[#646A79]",
         onClick && "cursor-pointer hover:bg-[rgba(158,172,182,0.18)]"
@@ -46,6 +53,9 @@ export function EreignisListRow({
       <span>
         <PrioritätBadge prio={priorität} />
       </span>
+      {showBetroffen && (
+        <span className="font-medium text-[15px]">{betroffen ?? "—"}</span>
+      )}
       <span className="font-medium text-[15px]">{erstelltAt}</span>
     </div>
   );

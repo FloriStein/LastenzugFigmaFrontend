@@ -75,3 +75,56 @@ describe("EreignisListRow", () => {
     expect(row.className).toContain("cursor-pointer");
   });
 });
+
+describe("EreignisListRow — SL-01: Betroffen-Spalte", () => {
+  it("kein showBetroffen → betroffen-Text nicht sichtbar", () => {
+    render(<EreignisListRow {...BASE_PROPS} betroffen="Mitarbeitertransport" />);
+    expect(screen.queryByText("Mitarbeitertransport")).not.toBeInTheDocument();
+  });
+
+  it("showBetroffen=true + betroffen-Wert → zeigt betroffen-Text", () => {
+    render(<EreignisListRow {...BASE_PROPS} showBetroffen betroffen="Mitarbeitertransport" />);
+    expect(screen.getByText("Mitarbeitertransport")).toBeInTheDocument();
+  });
+
+  it("showBetroffen=true + kein betroffen-Prop → zeigt '—'", () => {
+    render(<EreignisListRow {...BASE_PROPS} showBetroffen />);
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("showBetroffen=true + betroffen=undefined → zeigt '—'", () => {
+    render(<EreignisListRow {...BASE_PROPS} showBetroffen betroffen={undefined} />);
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("showBetroffen=true → Grid enthält 250px Spalte", () => {
+    const { container } = render(<EreignisListRow {...BASE_PROPS} showBetroffen />);
+    const row = container.firstChild as HTMLElement;
+    expect(row.className).toContain("250px");
+  });
+
+  it("showBetroffen=false → kein 250px im Grid", () => {
+    const { container } = render(<EreignisListRow {...BASE_PROPS} />);
+    const row = container.firstChild as HTMLElement;
+    expect(row.className).not.toContain("250px");
+  });
+
+  it("betroffen-Wert mit Komma wird vollständig angezeigt", () => {
+    render(
+      <EreignisListRow
+        {...BASE_PROPS}
+        showBetroffen
+        betroffen="Produktion A, Mitarbeitertransport"
+      />
+    );
+    expect(screen.getByText("Produktion A, Mitarbeitertransport")).toBeInTheDocument();
+  });
+
+  it("showBetroffen ändert die anderen Spalteninhalte nicht", () => {
+    render(<EreignisListRow {...BASE_PROPS} showBetroffen betroffen="Zone X" />);
+    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("Strecke blockiert")).toBeInTheDocument();
+    expect(screen.getByText("Routenzug A")).toBeInTheDocument();
+    expect(screen.getByText("14:28 Uhr")).toBeInTheDocument();
+  });
+});

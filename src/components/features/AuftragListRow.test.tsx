@@ -54,9 +54,9 @@ describe("AuftragListRow — Grundstruktur", () => {
     expect(screen.getByText("08:45")).toBeInTheDocument();
   });
 
-  it("hat h-[48px] Zeilen-Höhe", () => {
+  it("hat h-12 Zeilen-Höhe", () => {
     const { container } = render(<AuftragListRow {...BASE_PROPS} />);
-    expect(container.querySelector('[class*="h-\\[48px\\]"]')).toBeInTheDocument();
+    expect(container.querySelector(".h-12")).toBeInTheDocument();
   });
 
   it("hat bg-[rgba(158,172,182,0.1)] Hintergrund", () => {
@@ -119,5 +119,66 @@ describe("AuftragListRow — Edge Cases", () => {
     );
     const spans = container.querySelectorAll(".truncate");
     expect(spans.length).toBeGreaterThan(0);
+  });
+});
+
+describe("AuftragListRow — MA-01: Artikel-Spalte (showArtikelSpalte)", () => {
+  it("showArtikelSpalte=true → zeigt enthalteneArtikel statt Von-Wert", () => {
+    render(<AuftragListRow {...BASE_PROPS} showArtikelSpalte enthalteneArtikel="Karosserieteil A" />);
+    expect(screen.getByText("Karosserieteil A")).toBeInTheDocument();
+    expect(screen.queryByText("Lager A")).not.toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=true + kein enthalteneArtikel → zeigt '—'", () => {
+    render(<AuftragListRow {...BASE_PROPS} showArtikelSpalte />);
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=false → Von-Wert sichtbar, enthalteneArtikel nicht", () => {
+    render(<AuftragListRow {...BASE_PROPS} enthalteneArtikel="Karosserieteil A" />);
+    expect(screen.getByText("Lager A")).toBeInTheDocument();
+    expect(screen.queryByText("Karosserieteil A")).not.toBeInTheDocument();
+  });
+
+  it("showArtikelSpalte=false → Ab-Zeit sichtbar", () => {
+    render(<AuftragListRow {...BASE_PROPS} />);
+    expect(screen.getByText("08:00")).toBeInTheDocument();
+  });
+});
+
+describe("AuftragListRow — MA-01: Optionale Felder", () => {
+  it("art=undefined → zeigt '—'", () => {
+    render(<AuftragListRow {...BASE_PROPS} art={undefined} />);
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it("ziel=undefined → zeigt '—'", () => {
+    render(<AuftragListRow {...BASE_PROPS} ziel={undefined} />);
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it("auftraggeber=undefined → zeigt '—'", () => {
+    render(<AuftragListRow {...BASE_PROPS} auftraggeber={undefined} />);
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it("ankunft=undefined → zeigt '—' statt leerem Text", () => {
+    render(<AuftragListRow {...BASE_PROPS} ankunft={undefined} />);
+    const dashes = screen.getAllByText("—");
+    expect(dashes.length).toBeGreaterThan(0);
+  });
+
+  it("alle optionalen Felder undefined → rendert ohne Crash", () => {
+    expect(() =>
+      render(<AuftragListRow id="MIN" status="aktiv" />)
+    ).not.toThrow();
+  });
+
+  it("fehlende linie zeigt '—'", () => {
+    render(<AuftragListRow {...BASE_PROPS} linie={undefined} />);
+    expect(screen.getByText("—")).toBeInTheDocument();
   });
 });

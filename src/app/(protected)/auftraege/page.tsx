@@ -7,6 +7,7 @@ import { EMPTY_AUFTRAG_FILTER } from "@/types/auftrag";
 import { AuftragListView } from "@/components/features/AuftragListView";
 import { AuftragErstellenDialog } from "@/components/features/AuftragErstellenDialog";
 import { AuftragFilterDialog } from "@/components/features/AuftragFilterDialog";
+import { useRole } from "@/lib/useRole";
 
 const INITIAL_AUFTRÄGE: Auftrag[] = [
   {
@@ -19,6 +20,7 @@ const INITIAL_AUFTRÄGE: Auftrag[] = [
     auftraggeber: "Sabine M.",
     status: "aktiv",
     ankunft: "08:45",
+    enthalteneArtikel: "Karosserieteil A",
   },
   {
     id: "AUF-002",
@@ -30,6 +32,7 @@ const INITIAL_AUFTRÄGE: Auftrag[] = [
     auftraggeber: "Jonas M.",
     status: "geplant",
     ankunft: "10:00",
+    enthalteneArtikel: "—",
   },
   {
     id: "AUF-003",
@@ -41,6 +44,31 @@ const INITIAL_AUFTRÄGE: Auftrag[] = [
     auftraggeber: "System",
     status: "unterbrochen",
     ankunft: "11:30",
+    enthalteneArtikel: "—",
+  },
+  {
+    id: "#212",
+    linie: "—",
+    art: "Lieferung",
+    von: "Lager A",
+    ab: "12:00",
+    ziel: "Halle A",
+    auftraggeber: "Jonas Muster",
+    status: "aktiv",
+    ankunft: "12:10 Uhr",
+    enthalteneArtikel: "Karosserieteil B",
+  },
+  {
+    id: "#210",
+    linie: "—",
+    art: "Lieferung",
+    von: "Lager A",
+    ab: "12:10",
+    ziel: "Halle A",
+    auftraggeber: "Jonas Muster",
+    status: "unterbrochen",
+    ankunft: "12:20 Uhr (+5)",
+    enthalteneArtikel: "Karosserieteil A",
   },
   {
     id: "AUF-004",
@@ -51,15 +79,24 @@ const INITIAL_AUFTRÄGE: Auftrag[] = [
     auftraggeber: "Matthias M.",
     status: "aktiv",
     ankunft: "13:20",
+    enthalteneArtikel: "Maschinenteil X",
   },
 ];
 
 function AuftragPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const role = useRole();
+  const isMA = role === "mitarbeiter";
+
   const tabParam = searchParams.get("tab");
-  const initialTab: AuftragTab =
-    tabParam === "offen" || tabParam === "archiv" ? tabParam : "alle";
+  const validTabs: AuftragTab[] = isMA
+    ? ["alle", "meine-lieferungen", "offen", "archiv"]
+    : ["alle", "offen", "archiv"];
+  const initialTab: AuftragTab = validTabs.includes(tabParam as AuftragTab)
+    ? (tabParam as AuftragTab)
+    : "alle";
+
   const [activeTab, setActiveTab] = useState<AuftragTab>(initialTab);
   const [searchValue, setSearchValue] = useState("");
   const [aufträge, setAufträge] = useState<Auftrag[]>(INITIAL_AUFTRÄGE);
@@ -78,24 +115,29 @@ function AuftragPageContent() {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           onRowClick={(id) => router.push(`/auftraege/${encodeURIComponent(id)}`)}
-          onNeuErstellen={() => setCreateOpen(true)}
+          onNeuErstellen={isMA ? undefined : () => setCreateOpen(true)}
           filter={auftragsFilter}
           onFilterOpen={() => setFilterOpen(true)}
           onFilterRemove={(key) =>
             setAuftragsFilter((prev) => ({ ...prev, [key]: [] }))
           }
+          showMeineTab={isMA}
+          showArtikelSpalte={isMA}
+          onSaveView={isMA ? () => {} : undefined}
         />
       </main>
-      <AuftragErstellenDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onSubmit={(data) =>
-          setAufträge((prev) => [
-            { ...data, id: `AUF-${String(prev.length + 1).padStart(3, "0")}` },
-            ...prev,
-          ])
-        }
-      />
+      {!isMA && (
+        <AuftragErstellenDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={(data) =>
+            setAufträge((prev) => [
+              { ...data, id: `AUF-${String(prev.length + 1).padStart(3, "0")}` },
+              ...prev,
+            ])
+          }
+        />
+      )}
       <AuftragFilterDialog
         open={filterOpen}
         onOpenChange={setFilterOpen}

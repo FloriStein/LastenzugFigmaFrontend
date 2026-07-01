@@ -68,8 +68,9 @@ describe("EreignissePage — URL-Tab-Sync (RF-06)", () => {
   it("?tab=offen → zeigt nur Ereignisse mit status neu/warten", () => {
     mockGet.mockReturnValue("offen");
     render(<EreignissePage />);
-    expect(screen.getByText("#103")).toBeInTheDocument();
+    expect(screen.getByText("#102")).toBeInTheDocument();
     expect(screen.getByText("#96")).toBeInTheDocument();
+    expect(screen.queryByText("#103")).not.toBeInTheDocument();
     expect(screen.queryByText("#99")).not.toBeInTheDocument();
     expect(screen.queryByText("#95")).not.toBeInTheDocument();
   });
