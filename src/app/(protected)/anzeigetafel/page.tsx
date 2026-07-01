@@ -1,13 +1,15 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 interface Abfahrt {
   id: string;
   richtung: string;
   via: string;
   abfahrt: string;
   verspaetung?: string;
-  umleitung?: string;
+  hinweis?: string;
 }
-
-const MOCK_UHRZEIT = "11:35";
 
 const MOCK_ABFAHRTEN: Abfahrt[] = [
   {
@@ -22,7 +24,7 @@ const MOCK_ABFAHRTEN: Abfahrt[] = [
     richtung: "Hauptgebäude",
     via: "via Lager H → Lager F → Lager E",
     abfahrt: "in 2h 9min",
-    umleitung: "Haltestelle Halle A entfällt",
+    hinweis: "Haltestelle Halle A entfällt",
   },
   {
     id: "3",
@@ -32,16 +34,42 @@ const MOCK_ABFAHRTEN: Abfahrt[] = [
   },
 ];
 
+function BusIcon() {
+  return (
+    <svg width="110" height="110" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="20" width="90" height="60" rx="10" fill="#9A9EA0" />
+      <rect x="18" y="28" width="30" height="22" rx="4" fill="#E0E8EF" />
+      <rect x="62" y="28" width="30" height="22" rx="4" fill="#E0E8EF" />
+      <rect x="10" y="68" width="90" height="16" rx="4" fill="#646A79" />
+      <circle cx="27" cy="92" r="10" fill="#2A2F3B" />
+      <circle cx="83" cy="92" r="10" fill="#2A2F3B" />
+    </svg>
+  );
+}
+
+function formatTime(date: Date): string {
+  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+}
+
 export default function AnzeigetafelPage() {
+  const [uhrzeit, setUhrzeit] = useState(formatTime(new Date()));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUhrzeit(formatTime(new Date()));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-dark-surface h-55 flex items-end justify-between px-14 pb-8 shrink-0">
+      <div className="bg-dark-surface flex items-end justify-between px-14 pb-8 shrink-0" style={{ height: "220px" }}>
         <div>
           <p className="text-white text-[24px] font-medium">Haltestelle</p>
           <p className="text-white text-[96px] font-bold leading-none">Lager A</p>
         </div>
-        <p className="text-white text-[96px] font-normal">{MOCK_UHRZEIT}</p>
+        <p className="text-white text-[96px] font-normal tabular-nums">{uhrzeit}</p>
       </div>
 
       {/* Spalten-Header */}
@@ -52,29 +80,30 @@ export default function AnzeigetafelPage() {
       </div>
 
       {/* Abfahrts-Reihen */}
-      <div className="bg-[#E6E6E6] flex-1">
+      <div className="flex-1">
         {MOCK_ABFAHRTEN.map((abfahrt) => (
-          <div key={abfahrt.id} className="flex items-center h-49.5 px-14 border-b border-gray-300">
+          <div
+            key={abfahrt.id}
+            className="flex items-center px-14 border-b border-gray-300 bg-[#E6E6E6]"
+            style={{ height: "198px" }}
+          >
             {/* Linie */}
-            <div className="w-53.5 shrink-0">
-              <div className="w-27.5 h-27.5 bg-gray-300 rounded-full" />
+            <div className="w-53.5 shrink-0 flex items-center">
+              <BusIcon />
             </div>
+
             {/* Richtung */}
             <div className="flex-1">
-              <p className="text-black font-bold text-[28px]">{abfahrt.richtung}</p>
-              <p className="text-dark-surface font-medium text-[34px]">{abfahrt.via}</p>
-              {abfahrt.umleitung && (
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="bg-[rgba(233,119,6,0.8)] text-white text-[28px] font-semibold px-4 py-1 rounded-[10px]">
-                    Umleitung
-                  </span>
-                  <span className="text-black font-medium text-[34px]">{abfahrt.umleitung}</span>
-                </div>
+              <p className="text-black font-bold text-[54px] leading-tight">{abfahrt.richtung}</p>
+              <p className="text-dark-surface font-medium text-[34px] leading-tight">{abfahrt.via}</p>
+              {abfahrt.hinweis && (
+                <p className="text-black font-medium text-[28px] mt-1">{abfahrt.hinweis}</p>
               )}
             </div>
+
             {/* Abfahrt */}
             <div className="w-75 text-right shrink-0">
-              <p className="text-black text-[54px] font-medium">{abfahrt.abfahrt}</p>
+              <p className="text-black text-[54px] font-medium leading-tight">{abfahrt.abfahrt}</p>
               {abfahrt.verspaetung && (
                 <p className="text-dark-surface text-[32px] font-medium">{abfahrt.verspaetung}</p>
               )}

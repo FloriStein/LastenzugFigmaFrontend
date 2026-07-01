@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRole } from "@/lib/useRole";
 
 const EREIGNISAUFKOMMEN = [
   { tag: "Mo", abgeschlossen: 8,  einkommend: 4 },
@@ -42,6 +43,22 @@ const NACH_ROUTENZUG = [
   { name: "Routenzug D", abgeschlossen: 8,  einkommend: 3 },
 ];
 
+const BEARBEITETE_AUFTRAEGE = [
+  { tag: "Mo", auftraege: 8  },
+  { tag: "Di", auftraege: 12 },
+  { tag: "Mi", auftraege: 7  },
+  { tag: "Do", auftraege: 10 },
+  { tag: "Fr", auftraege: 14 },
+  { tag: "Sa", auftraege: 11 },
+  { tag: "So", auftraege: 16 },
+];
+
+const GAST_KPIS = [
+  { wert: "3 min 20s", label: "schnellere Lieferung von Aufträgen"              },
+  { wert: "+13",       label: "bearbeitete Aufträge am Tag"                     },
+  { wert: "20%",       label: "geringeres innerbetriebliches Verkehrsaufkommen" },
+];
+
 const GESAMT = NACH_ART.reduce((s, e) => s + e.value, 0);
 
 function Panel({ title, children, headerRight }: { title: string; children: React.ReactNode; headerRight?: React.ReactNode }) {
@@ -56,12 +73,155 @@ function Panel({ title, children, headerRight }: { title: string; children: Reac
   );
 }
 
+function KpiCard({ wert, label }: { wert: string; label: string }) {
+  return (
+    <div className="flex flex-col items-center text-center gap-3 flex-1">
+      <div className="w-16.75 h-16.75 bg-blue-primary rounded-full flex items-center justify-center shrink-0">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="white">
+          <circle cx="16" cy="16" r="12" stroke="white" strokeWidth="2.5" fill="none" />
+          <path d="M16 10v6l4 4" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+      </div>
+      <span className="text-[24px] font-bold text-black">{wert}</span>
+      <span className="text-[18px] text-center text-black leading-snug">{label}</span>
+    </div>
+  );
+}
+
+function LiveansichtPlaceholder() {
+  return (
+    <div className="relative w-full h-full bg-[#E3EBE3] rounded-[10px] overflow-hidden">
+      <div className="absolute" style={{ left: "20%", top: "20%", width: "15%", height: "12%" }}>
+        <div className="w-full h-full bg-[#D9D9D9] rounded-sm" />
+      </div>
+      <div className="absolute" style={{ left: "45%", top: "25%", width: "20%", height: "15%" }}>
+        <div className="w-full h-full bg-[#D9D9D9] rounded-sm" />
+      </div>
+      <div className="absolute" style={{ left: "65%", top: "18%", width: "12%", height: "18%" }}>
+        <div className="w-full h-full bg-[#D9D9D9] rounded-sm" />
+      </div>
+      <div className="absolute" style={{ left: "15%", top: "55%", width: "18%", height: "14%" }}>
+        <div className="w-full h-full bg-[#D9D9D9] rounded-sm" />
+      </div>
+      <div className="absolute" style={{ left: "45%", top: "60%", width: "22%", height: "12%" }}>
+        <div className="w-full h-full bg-[#D9D9D9] rounded-sm" />
+      </div>
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M 25 48 L 44 48 L 55 35 L 66 35" stroke="#146AA1" strokeWidth="0.8" fill="none" strokeDasharray="2,1" />
+        <path d="M 66 60 L 55 60 L 44 48" stroke="#146AA1" strokeWidth="0.8" fill="none" strokeDasharray="2,1" />
+      </svg>
+      <div
+        className="absolute flex items-center justify-center text-white text-[12px] font-bold bg-blue-primary rounded-full"
+        style={{ left: "30%", top: "44%", width: "28px", height: "28px", transform: "translate(-50%,-50%)" }}
+      >
+        A
+      </div>
+      <div
+        className="absolute flex items-center justify-center text-white text-[12px] font-bold bg-blue-primary rounded-full"
+        style={{ left: "58%", top: "57%", width: "28px", height: "28px", transform: "translate(-50%,-50%)" }}
+      >
+        B
+      </div>
+      <span className="absolute text-[10px] font-semibold text-dark-surface opacity-70"
+        style={{ left: "21%", top: "34%" }}>Lager A</span>
+      <span className="absolute text-[10px] font-semibold text-dark-surface opacity-70"
+        style={{ left: "47%", top: "23%" }}>Hauptgebäude</span>
+      <span className="absolute text-[10px] font-semibold text-dark-surface opacity-70"
+        style={{ left: "16%", top: "53%" }}>Lager H</span>
+      <span className="absolute text-[10px] font-semibold text-dark-surface opacity-70"
+        style={{ left: "46%", top: "58%" }}>Halle A</span>
+    </div>
+  );
+}
+
+function GastStatistikenView() {
+  return (
+    <main className="px-14 pt-16 pb-16">
+      <h1 className="text-[48px] font-bold mb-8">Automatisierte Routenzüge im Einsatz</h1>
+
+      <div className="flex gap-6" style={{ minHeight: "867px" }}>
+        {/* Linkes Panel: Liveansicht */}
+        <div className="flex-1 bg-[#F2F2F2] rounded-[10px] p-6 flex flex-col">
+          <h2 className="text-[32px] font-bold mb-4">Liveansicht Betriebsgelände</h2>
+          <div className="flex-1">
+            <LiveansichtPlaceholder />
+          </div>
+        </div>
+
+        {/* Rechte Spalte */}
+        <div className="flex flex-col gap-6 shrink-0" style={{ width: "770px" }}>
+          {/* Bearbeitete Aufträge */}
+          <div className="bg-[#F2F2F2] rounded-[10px] p-6 flex-1">
+            <h2 className="text-[32px] font-bold mb-4">Bearbeitete Aufträge</h2>
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={BEARBEITETE_AUFTRAEGE}>
+                <XAxis dataKey="tag" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="auftraege"
+                  stroke="#E97706"
+                  fill="#E97706"
+                  fillOpacity={0.23}
+                  name="Aufträge"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Vorteile */}
+          <div className="bg-[#F2F2F2] rounded-[10px] p-6">
+            <h2 className="text-[32px] font-bold mb-6">Vorteile</h2>
+            <div className="flex gap-6 justify-around">
+              {GAST_KPIS.map((kpi) => (
+                <KpiCard key={kpi.wert} wert={kpi.wert} label={kpi.label} />
+              ))}
+            </div>
+            <p className="text-[16px] text-[#515358] mt-6 text-center">
+              im Vergleich zum herkömmlichen Einsatz von Gabelstaplern
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function StatistikenPage() {
   const [zeitraum, setZeitraum] = useState("10");
+  const role = useRole();
+  const isSL = role === "schichtleitung";
+  const [filterArt, setFilterArt] = useState<string | null>("Strecke blockiert");
+
+  if (role === "gast") {
+    return <GastStatistikenView />;
+  }
 
   return (
     <main className="px-14 pt-16 pb-16 flex flex-col gap-6">
       <h1 className="text-[42px] font-bold">Statistiken</h1>
+
+      {isSL && (
+        <div className="flex items-center gap-3">
+          {filterArt && (
+            <div className="flex items-center gap-2 bg-[#4EA7DF] text-white rounded px-3 py-1.5">
+              <span className="text-[18px] font-medium">Art: {filterArt}</span>
+              <button
+                onClick={() => setFilterArt(null)}
+                className="text-white/80 hover:text-white text-[20px] leading-none"
+                aria-label="Filter entfernen"
+              >
+                ×
+              </button>
+            </div>
+          )}
+          <button className="flex items-center gap-2 bg-[rgba(20,106,161,0.1)] text-blue-primary rounded px-3 py-1.5 text-[18px] font-semibold hover:bg-[rgba(20,106,161,0.15)] transition-colors">
+            neuer Filter
+          </button>
+        </div>
+      )}
 
       {/* Panel 1 — Ereignisaufkommen */}
       <Panel

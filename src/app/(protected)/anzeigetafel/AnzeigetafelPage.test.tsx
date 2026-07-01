@@ -12,9 +12,12 @@ describe("ANZ-01 — AnzeigetafelPage — Header", () => {
     expect(screen.getByText("Lager A")).toBeInTheDocument();
   });
 
-  it("zeigt Mock-Uhrzeit '11:35'", () => {
+  it("zeigt aktuelle Systemzeit im Format HH:MM", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-01T11:35:00"));
     render(<AnzeigetafelPage />);
     expect(screen.getByText("11:35")).toBeInTheDocument();
+    vi.useRealTimers();
   });
 });
 
@@ -38,7 +41,7 @@ describe("ANZ-01 — AnzeigetafelPage — Spalten-Header", () => {
 describe("ANZ-01 — AnzeigetafelPage — Abfahrts-Reihen", () => {
   it("zeigt 3 Abfahrts-Reihen", () => {
     const { container } = render(<AnzeigetafelPage />);
-    const rows = container.querySelectorAll('[class*="h-49.5"]');
+    const rows = container.querySelectorAll('[style*="198px"]');
     expect(rows).toHaveLength(3);
   });
 
@@ -91,19 +94,20 @@ describe("ANZ-01 — AnzeigetafelPage — Statusmeldungen", () => {
     expect(screen.getByText("1min verspätet")).toBeInTheDocument();
   });
 
-  it("zeigt 'Umleitung'-Badge für Abfahrt 2", () => {
+  it("kein separater 'Umleitung'-Badge — Hinweis als einfacher Text", () => {
     render(<AnzeigetafelPage />);
-    expect(screen.getByText("Umleitung")).toBeInTheDocument();
+    expect(screen.queryByText("Umleitung")).not.toBeInTheDocument();
+    expect(screen.getByText("Haltestelle Halle A entfällt")).toBeInTheDocument();
   });
 
-  it("zeigt Umleitungstext 'Haltestelle Halle A entfällt'", () => {
+  it("zeigt Hinweistext 'Haltestelle Halle A entfällt'", () => {
     render(<AnzeigetafelPage />);
     expect(screen.getByText("Haltestelle Halle A entfällt")).toBeInTheDocument();
   });
 
-  it("Abfahrt 3 hat keine Verspätung und keine Umleitung", () => {
+  it("Abfahrt 3 hat keine Verspätung und keinen Hinweis", () => {
     render(<AnzeigetafelPage />);
-    expect(screen.queryAllByText("Umleitung")).toHaveLength(1);
+    expect(screen.queryByText("Umleitung")).not.toBeInTheDocument();
     expect(screen.queryAllByText(/verspätet/)).toHaveLength(1);
   });
 });
@@ -118,9 +122,8 @@ describe("ANZ-01 — AnzeigetafelPage — Edge Cases", () => {
     expect(container.querySelector('[class*="bg-dark-surface"]')).toBeInTheDocument();
   });
 
-  it("Umleitung-Badge hat orangen Hintergrund", () => {
+  it("zeigt Bus-Icon (SVG) in der Linie-Spalte", () => {
     const { container } = render(<AnzeigetafelPage />);
-    const badge = container.querySelector('[class*="233,119,6"]');
-    expect(badge).toBeInTheDocument();
+    expect(container.querySelectorAll("svg").length).toBeGreaterThan(0);
   });
 });

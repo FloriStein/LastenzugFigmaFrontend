@@ -100,4 +100,4 @@ Werden nach dem Design Audit in `tailwind.config.ts` eingetragen:
 | Sprint 11 | SearchBar Clear, Filter-Dialoge (Ereignisse/Aufträge), Erstellen-Dialog | ✅ |
 | Sprint 12 | Root-Redirect, Sidebar OR, Abschließen-Bestätigung, Ereignis-Detail Status-Workflow | ✅ |
 | Sprint 13 | Rollen-Zugangskontrolle, Mitarbeitertransport-Detail, Ereignisansicht SL, Aufträge MA | ✅ |
-| Sprint 14 | Anzeigetafel-Polishing, Statistiken SL, Statistiken Gast | ⬅️ offen |
+| Sprint 14 | Anzeigetafel-Polishing, Statistiken SL, Statistiken Gast | ✅ |
